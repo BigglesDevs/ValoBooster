@@ -93,8 +93,6 @@ const FIXED_PRICES = {
   'place-10': 54.99,
 };
 
-// Boost mode multipliers
-const BOOST_MODE_MULT = { shared: 1.00, selfplay: 1.35 };
 
 // Platform multipliers
 const PLATFORM_MULT = { pc: 1.00, ps5: 1.10, xbox: 1.10 };
@@ -263,11 +261,10 @@ toRankSel.addEventListener('change',   updateCalc);
 // SERVICE / MODE / PLATFORM / REGION LISTENERS
 // ============================================================
 const serviceTypeSel = document.getElementById('serviceType');
-const boostModeSel   = document.getElementById('boostMode');
 const platformSel    = document.getElementById('platform');
 const regionSel      = document.getElementById('region');
 
-[serviceTypeSel, boostModeSel, platformSel, regionSel].forEach(el => {
+[serviceTypeSel, platformSel, regionSel].forEach(el => {
   if (el) el.addEventListener('change', updateOrderTotal);
 });
 
@@ -311,7 +308,6 @@ function getAddonTotal(base) {
 
 function updateOrderTotal() {
   const svcType  = serviceTypeSel ? serviceTypeSel.value : 'rank';
-  const modeMult = BOOST_MODE_MULT[boostModeSel ? boostModeSel.value : 'shared'] || 1;
   const platMult = PLATFORM_MULT[platformSel ? platformSel.value : 'pc'] || 1;
   const regMult  = REGION_MULT[regionSel ? regionSel.value : 'na'] || 1;
 
@@ -334,8 +330,8 @@ function updateOrderTotal() {
     return 0;
   }
 
-  // Apply mode / platform / region
-  const afterOptions = base * modeMult * platMult * regMult;
+  // Apply platform / region
+  const afterOptions = base * platMult * regMult;
 
   // Addons on top of options price
   const { lines: addonLines } = getAddonTotal(afterOptions);
@@ -350,10 +346,6 @@ function updateOrderTotal() {
   let html = `<span><strong>${label}</strong></span>`;
   html += `<span>Base: £${base.toFixed(2)}</span>`;
 
-  if (modeMult !== 1) {
-    const mode = boostModeSel.value === 'selfplay' ? 'Self-Play/Duo' : '';
-    html += `<span>${mode}: +35% (+£${(base * modeMult - base).toFixed(2)})</span>`;
-  }
   if (platMult !== 1) {
     const plat = platformSel.value.toUpperCase();
     html += `<span>${plat}: +10% (+£${(base * platMult - base).toFixed(2)})</span>`;
@@ -438,18 +430,16 @@ const modalCheckout = document.getElementById('modalCheckoutBtn');
 function openModal(total, label) {
   const svcType  = serviceTypeSel.value;
   const base     = svcType === 'rank' ? rankBasePrice : (FIXED_PRICES[svcType] || 0);
-  const modeMult = BOOST_MODE_MULT[boostModeSel ? boostModeSel.value : 'shared'] || 1;
   const platMult = PLATFORM_MULT[platformSel ? platformSel.value : 'pc'] || 1;
   const regMult  = REGION_MULT[regionSel ? regionSel.value : 'na'] || 1;
-  const afterOptions = base * modeMult * platMult * regMult;
+  const afterOptions = base * platMult * regMult;
   const { lines: addonLines } = getAddonTotal(afterOptions);
   const addonTotal = addonLines.reduce((s, a) => s + a.amt, 0);
   const beforeDiscount = afterOptions + addonTotal;
 
-  const modeText = boostModeSel && boostModeSel.value === 'selfplay' ? ' — Self-Play/Duo' : ' — Account Shared';
   const platText = platformSel ? ` | ${platformSel.value.toUpperCase()}` : '';
   const regText  = regionSel ? ` | ${REGION_LABEL[regionSel.value]}` : '';
-  modalSummary.textContent = label + modeText + platText + regText;
+  modalSummary.textContent = label + ' — Duo Queue' + platText + regText;
 
   if (activeDiscount > 0 && beforeDiscount !== total) {
     modalOriginal.textContent = '£' + beforeDiscount.toFixed(2);
@@ -521,7 +511,6 @@ modalCheckout.addEventListener('click', async () => {
     return;
   }
 
-  const modeName   = boostModeSel?.selectedOptions[0]?.text?.split(' —')[0] || '';
   const platName   = platformSel?.selectedOptions[0]?.text || '';
   const regName    = regionSel?.selectedOptions[0]?.text || '';
   const addonNames = ADDON_IDS
@@ -549,7 +538,7 @@ modalCheckout.addEventListener('click', async () => {
         email,
         description: serviceDesc,
         reference,
-        options: `${modeName} | ${platName} | ${regName}`,
+        options: `Duo Queue | ${platName} | ${regName}`,
         addons:  addonNames,
         promo:   activeCode || null,
       }),
