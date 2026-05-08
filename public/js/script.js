@@ -38,11 +38,31 @@ async function loadRankIcons() {
     const tiers = json.data[json.data.length - 1].tiers;
     tiers.forEach(t => {
       const name = TIER_TO_RANK[t.tier];
-      if (name && t.rankTriangleUpIcon) RANK_ICONS[name] = t.rankTriangleUpIcon;
+      if (name && t.largeIcon) RANK_ICONS[name] = t.largeIcon;
     });
-    // Refresh icons if ranks already selected
+    // Refresh dropdown icons if ranks already selected
     setRankIcon(document.getElementById('fromRankIcon'), document.getElementById('fromRank')?.value);
     setRankIcon(document.getElementById('toRankIcon'),   document.getElementById('toRank')?.value);
+
+    // Inject badges into pricing tier grid
+    const tierCardMap = {
+      'tierBadge-iron':      'Iron I',
+      'tierBadge-bronze':    'Bronze I',
+      'tierBadge-silver':    'Silver I',
+      'tierBadge-gold':      'Gold I',
+      'tierBadge-plat':      'Platinum I',
+      'tierBadge-diamond':   'Diamond I',
+      'tierBadge-ascendant': 'Ascendant I',
+      'tierBadge-immortal':  'Immortal I',
+      'tierBadge-radiant':   'Radiant',
+    };
+    Object.entries(tierCardMap).forEach(([id, rank]) => {
+      const img = document.getElementById(id);
+      if (img && RANK_ICONS[rank]) {
+        img.src = RANK_ICONS[rank];
+        img.style.display = 'block';
+      }
+    });
   } catch (e) {
     console.warn('Could not load rank icons:', e.message);
   }

@@ -323,14 +323,24 @@ ul { list-style: none; }
   left: 8px;
   top: 50%;
   transform: translateY(-50%);
-  width: 32px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
   pointer-events: none;
   z-index: 1;
   filter: drop-shadow(0 0 4px rgba(0,0,0,0.5));
 }
-.rank-sel-wrap.has-icon select { padding-left: 48px; }
+.rank-sel-wrap.has-icon select { padding-left: 52px; }
+
+/* TIER GRID BADGES */
+.tier-badge {
+  display: none;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  margin: 0 auto 8px;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+}
 .rank-sel-wrap select { width: 100%; }
 
 /* RANK SUMMARY ICONS */
