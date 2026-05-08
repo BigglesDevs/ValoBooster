@@ -1,0 +1,7 @@
+# Keep secrets out of version control
+.env
+public/js/config.js
+
+# OS junk
+.DS_Store
+Thumbs.db

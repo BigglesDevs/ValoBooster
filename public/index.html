@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ValBoost — #1 Valorant Rank Boosting Service</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- PROMO BANNER -->
+  <div class="promo-banner" id="promoBanner">
+    <span>&#9889; LIMITED TIME: Use code <strong>SAVE20</strong> for 20% off your first order!</span>
+    <button class="promo-close" id="promoBannerClose" aria-label="Close">&times;</button>
+  </div>
+
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="#" class="logo">VAL<span>BOOST</span></a>
+      <ul class="nav-links">
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#order" class="btn-nav">Order Now</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Menu">&#9776;</button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#pricing">Pricing</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#how">How It Works</a>
+      <a href="#faq">FAQ</a>
+      <a href="#order" class="btn-nav">Order Now</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-content">
+      <p class="hero-tag">&#128293; #1 Trusted Valorant Boosting Service</p>
+      <h1>Reach Your <span class="highlight">Dream Rank</span><br />Fast &amp; Safely</h1>
+      <p class="hero-sub">Pick your current rank, pick your goal — get an instant fair price. Professional Radiant-level boosters, results guaranteed.</p>
+      <div class="hero-actions">
+        <a href="#calculator" class="btn-primary">Get Instant Price</a>
+        <a href="#pricing" class="btn-outline">See Pricing</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span>8,400+</span><p>Orders Completed</p></div>
+        <div class="stat"><span>4.9★</span><p>Customer Rating</p></div>
+        <div class="stat"><span>1hr</span><p>Booster Start Time</p></div>
+        <div class="stat"><span>0</span><p>Bans Ever</p></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="rank-badge-wrap">
+        <div class="rank-badge">
+          <div class="badge-icon">&#9830;</div>
+          <div class="badge-label">DIAMOND</div>
+        </div>
+        <div class="live-pill">
+          <span class="live-dot"></span>
+          <span id="liveCount">47</span> boosts in progress
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- TRUST BAR -->
+  <section class="trust-bar">
+    <div class="trust-inner">
+      <div class="trust-item">&#128274; SSL Encrypted Checkout</div>
+      <div class="trust-item">&#9989; 100% Manual — No Bots</div>
+      <div class="trust-item">&#128176; Money-Back Guarantee</div>
+      <div class="trust-item">&#128188; Business Hours Support</div>
+      <div class="trust-item">&#9889; Booster Starts Within 1hr</div>
+      <div class="trust-item">&#127760; VPN + Offline Mode</div>
+    </div>
+  </section>
+
+  <!-- INSTANT PRICE CALCULATOR -->
+  <section class="calculator-section" id="calculator">
+    <div class="container">
+      <div class="calc-hero-box">
+        <div class="calc-hero-header">
+          <h2>&#9889; Get Your Instant Price</h2>
+          <p>Pick your current rank and goal rank — see your exact price in seconds.</p>
+        </div>
+        <div class="calc-hero-body">
+          <div class="calc-col">
+            <label for="fromRank">Current Rank</label>
+            <select id="fromRank">
+              <option value="">Select your rank</option>
+              <optgroup label="Iron"><option value="Iron I">Iron I</option><option value="Iron II">Iron II</option><option value="Iron III">Iron III</option></optgroup>
+              <optgroup label="Bronze"><option value="Bronze I">Bronze I</option><option value="Bronze II">Bronze II</option><option value="Bronze III">Bronze III</option></optgroup>
+              <optgroup label="Silver"><option value="Silver I">Silver I</option><option value="Silver II">Silver II</option><option value="Silver III">Silver III</option></optgroup>
+              <optgroup label="Gold"><option value="Gold I">Gold I</option><option value="Gold II">Gold II</option><option value="Gold III">Gold III</option></optgroup>
+              <optgroup label="Platinum"><option value="Platinum I">Platinum I</option><option value="Platinum II">Platinum II</option><option value="Platinum III">Platinum III</option></optgroup>
+              <optgroup label="Diamond"><option value="Diamond I">Diamond I</option><option value="Diamond II">Diamond II</option><option value="Diamond III">Diamond III</option></optgroup>
+              <optgroup label="Ascendant"><option value="Ascendant I">Ascendant I</option><option value="Ascendant II">Ascendant II</option><option value="Ascendant III">Ascendant III</option></optgroup>
+              <optgroup label="Immortal"><option value="Immortal I">Immortal I</option><option value="Immortal II">Immortal II</option><option value="Immortal III">Immortal III</option></optgroup>
+            </select>
+          </div>
+          <div class="calc-hero-arrow">&#8594;</div>
+          <div class="calc-col">
+            <label for="toRank">Desired Rank</label>
+            <select id="toRank">
+              <option value="">Select goal rank</option>
+              <optgroup label="Bronze"><option value="Bronze I">Bronze I</option><option value="Bronze II">Bronze II</option><option value="Bronze III">Bronze III</option></optgroup>
+              <optgroup label="Silver"><option value="Silver I">Silver I</option><option value="Silver II">Silver II</option><option value="Silver III">Silver III</option></optgroup>
+              <optgroup label="Gold"><option value="Gold I">Gold I</option><option value="Gold II">Gold II</option><option value="Gold III">Gold III</option></optgroup>
+              <optgroup label="Platinum"><option value="Platinum I">Platinum I</option><option value="Platinum II">Platinum II</option><option value="Platinum III">Platinum III</option></optgroup>
+              <optgroup label="Diamond"><option value="Diamond I">Diamond I</option><option value="Diamond II">Diamond II</option><option value="Diamond III">Diamond III</option></optgroup>
+              <optgroup label="Ascendant"><option value="Ascendant I">Ascendant I</option><option value="Ascendant II">Ascendant II</option><option value="Ascendant III">Ascendant III</option></optgroup>
+              <optgroup label="Immortal"><option value="Immortal I">Immortal I</option><option value="Immortal II">Immortal II</option><option value="Immortal III">Immortal III</option></optgroup>
+              <optgroup label="Radiant"><option value="Radiant">Radiant</option></optgroup>
+            </select>
+          </div>
+          <div class="calc-hero-result" id="calcHeroResult">
+            <div class="calc-label">Your Price</div>
+            <div class="calc-price" id="calcHeroPrice">—</div>
+            <div class="calc-divs" id="calcHeroDivs"></div>
+          </div>
+          <a href="#order" class="btn-primary calc-hero-btn" id="calcHeroOrderBtn">Order Now</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING TIERS (reference) -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <h2 class="section-title">Transparent <span class="highlight">Per-Division Pricing</span></h2>
+      <p class="section-sub">We charge per division climbed — not inflated flat packages. Lower ranks cost less, higher ranks cost more. Always fair.</p>
+
+      <div class="tier-grid">
+        <div class="tier-card">
+          <div class="tier-rank iron">&#9632; Iron</div>
+          <div class="tier-price">$6.99 <span>/division</span></div>
+          <p>Iron I – III</p>
+        </div>
+        <div class="tier-card">
+          <div class="tier-rank bronze">&#9632; Bronze</div>
+          <div class="tier-price">$8.99 <span>/division</span></div>
+          <p>Bronze I – III</p>
+        </div>
+        <div class="tier-card">
+          <div class="tier-rank silver">&#9632; Silver</div>
+          <div class="tier-price">$11.99 <span>/division</span></div>
+          <p>Silver I – III</p>
+        </div>
+        <div class="tier-card">
+          <div class="tier-rank gold">&#9632; Gold</div>
+          <div class="tier-price">$14.99 <span>/division</span></div>
+          <p>Gold I – III</p>
+        </div>
+        <div class="tier-card">
+          <div class="tier-rank plat">&#9632; Platinum</div>
+          <div class="tier-price">$19.99 <span>/division</span></div>
+          <p>Platinum I – III</p>
+        </div>
+        <div class="tier-card">
+          <div class="tier-rank diamond">&#9632; Diamond</div>
+          <div class="tier-price">$27.99 <span>/division</span></div>
+          <p>Diamond I – III</p>
+        </div>
+        <div class="tier-card">
+          <div class="tier-rank ascendant">&#9632; Ascendant</div>
+          <div class="tier-price">$39.99 <span>/division</span></div>
+          <p>Ascendant I – III</p>
+        </div>
+        <div class="tier-card">
+          <div class="tier-rank immortal">&#9632; Immortal</div>
+          <div class="tier-price">$59.99 <span>/division</span></div>
+          <p>Immortal I – III</p>
+        </div>
+        <div class="tier-card tier-radiant">
+          <div class="tier-rank radiant">&#11088; Radiant</div>
+          <div class="tier-price">$149.99 <span>flat</span></div>
+          <p>Immortal III → Radiant</p>
+        </div>
+      </div>
+
+      <div class="pricing-note">
+        <p>&#128161; <strong>Example:</strong> Silver II → Gold II = Silver II→III ($11.99) + Silver III→Gold I ($14.99) + Gold I→II ($14.99) = <strong>$41.97</strong></p>
+        <p>Use the instant price calculator at the top of the page for your exact total.</p>
+      </div>
+
+      <!-- SERVICE TABS -->
+      <div class="service-tabs">
+        <button class="tab-btn active" data-tab="rank">&#9650; Rank Boost</button>
+        <button class="tab-btn" data-tab="wins">&#9889; Win Boost</button>
+        <button class="tab-btn" data-tab="placement">&#127942; Placement Matches</button>
+      </div>
+
+      <div class="tab-content active" id="tab-rank">
+        <div class="example-cards">
+          <div class="ex-card">
+            <div class="ex-from iron-c">Iron I</div>
+            <div class="ex-arrow">&#8594;</div>
+            <div class="ex-to bronze-c">Bronze III</div>
+            <div class="ex-price">~$26</div>
+            <div class="ex-time">&#9201; ~24hrs</div>
+          </div>
+          <div class="ex-card">
+            <div class="ex-from silver-c">Silver I</div>
+            <div class="ex-arrow">&#8594;</div>
+            <div class="ex-to gold-c">Gold III</div>
+            <div class="ex-price">~$52</div>
+            <div class="ex-time">&#9201; ~48hrs</div>
+          </div>
+          <div class="ex-card ex-popular">
+            <div class="ex-badge">MOST POPULAR</div>
+            <div class="ex-from gold-c">Gold II</div>
+            <div class="ex-arrow">&#8594;</div>
+            <div class="ex-to plat-c">Platinum I</div>
+            <div class="ex-price">~$24</div>
+            <div class="ex-time">&#9201; ~36hrs</div>
+          </div>
+          <div class="ex-card">
+            <div class="ex-from plat-c">Platinum I</div>
+            <div class="ex-arrow">&#8594;</div>
+            <div class="ex-to diamond-c">Diamond I</div>
+            <div class="ex-price">~$45</div>
+            <div class="ex-time">&#9201; ~72hrs</div>
+          </div>
+          <div class="ex-card">
+            <div class="ex-from diamond-c">Diamond I</div>
+            <div class="ex-arrow">&#8594;</div>
+            <div class="ex-to asc-c">Ascendant I</div>
+            <div class="ex-price">~$45</div>
+            <div class="ex-time">&#9201; ~72hrs</div>
+          </div>
+        </div>
+        <p class="ex-note">Prices above are examples only. Use the calculator below for your exact price.</p>
+      </div>
+
+      <div class="tab-content" id="tab-wins">
+        <div class="cards wins-cards">
+          <div class="card">
+            <div class="card-badge">WIN BOOST</div>
+            <div class="card-rank silver">5 WINS</div>
+            <div class="card-price-wrap">
+              <span class="card-price-old">$19.99</span>
+              <span class="card-price">$14.99</span>
+            </div>
+            <ul class="card-features">
+              <li>&#10003; 5 Guaranteed Ranked Wins</li>
+              <li>&#10003; Dedicated Booster</li>
+              <li>&#10003; VPN Protection</li>
+              <li>&#10003; ~24hr Delivery</li>
+              <li>&#10003; Live Tracking</li>
+            </ul>
+            <button class="btn-primary buy-btn" data-package="wins-5" data-label="5 Win Boost">Order — $14.99</button>
+          </div>
+          <div class="card card-popular">
+            <div class="popular-tag">&#128293; BEST VALUE</div>
+            <div class="card-badge">WIN BOOST</div>
+            <div class="card-rank gold">10 WINS</div>
+            <div class="card-price-wrap">
+              <span class="card-price-old">$34.99</span>
+              <span class="card-price">$24.99</span>
+            </div>
+            <ul class="card-features">
+              <li>&#10003; 10 Guaranteed Ranked Wins</li>
+              <li>&#10003; Priority Booster</li>
+              <li>&#10003; VPN Protection</li>
+              <li>&#10003; ~48hr Delivery</li>
+              <li>&#10003; Live Tracking</li>
+              <li>&#10003; Duo Option Available</li>
+            </ul>
+            <button class="btn-primary buy-btn" data-package="wins-10" data-label="10 Win Boost">Order — $24.99</button>
+          </div>
+          <div class="card">
+            <div class="card-badge">WIN BOOST</div>
+            <div class="card-rank plat">20 WINS</div>
+            <div class="card-price-wrap">
+              <span class="card-price-old">$59.99</span>
+              <span class="card-price">$44.99</span>
+            </div>
+            <ul class="card-features">
+              <li>&#10003; 20 Guaranteed Ranked Wins</li>
+              <li>&#10003; Top-Rated Booster</li>
+              <li>&#10003; VPN Protection</li>
+              <li>&#10003; ~72hr Delivery</li>
+              <li>&#10003; Live Tracking</li>
+              <li>&#10003; Duo Option Available</li>
+              <li>&#10003; Priority Support</li>
+            </ul>
+            <button class="btn-primary buy-btn" data-package="wins-20" data-label="20 Win Boost">Order — $44.99</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-placement">
+        <div class="cards wins-cards">
+          <div class="card">
+            <div class="card-badge">PLACEMENTS</div>
+            <div class="card-rank silver">5 MATCHES</div>
+            <div class="card-price-wrap">
+              <span class="card-price-old">$24.99</span>
+              <span class="card-price">$17.99</span>
+            </div>
+            <ul class="card-features">
+              <li>&#10003; 5 Placement Matches</li>
+              <li>&#10003; Max Win Rate Focus</li>
+              <li>&#10003; Dedicated Booster</li>
+              <li>&#10003; VPN Protection</li>
+              <li>&#10003; ~24hr Delivery</li>
+            </ul>
+            <button class="btn-primary buy-btn" data-package="place-5" data-label="5 Placement Matches">Order — $17.99</button>
+          </div>
+          <div class="card card-popular">
+            <div class="popular-tag">&#128293; MOST POPULAR</div>
+            <div class="card-badge">PLACEMENTS</div>
+            <div class="card-rank gold">10 MATCHES</div>
+            <div class="card-price-wrap">
+              <span class="card-price-old">$44.99</span>
+              <span class="card-price">$32.99</span>
+            </div>
+            <ul class="card-features">
+              <li>&#10003; 10 Placement Matches</li>
+              <li>&#10003; Max Win Rate Focus</li>
+              <li>&#10003; Priority Booster</li>
+              <li>&#10003; VPN Protection</li>
+              <li>&#10003; ~48hr Delivery</li>
+              <li>&#10003; Live Tracking</li>
+            </ul>
+            <button class="btn-primary buy-btn" data-package="place-10" data-label="10 Placement Matches">Order — $32.99</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="custom-order">
+        <div class="custom-order-inner">
+          <div>
+            <h3>Need Something Custom?</h3>
+            <p>Immortal push? Multiple accounts? Coaching sessions? Contact us for a bespoke quote during business hours.</p>
+          </div>
+          <div class="custom-order-actions">
+            <a href="mailto:support@valboost.gg" class="btn-primary">Email for Quote</a>
+            <a href="#" class="btn-outline">Discord</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VS COMPETITOR TABLE -->
+  <section class="compare">
+    <div class="container">
+      <h2 class="section-title">Why Choose <span class="highlight">ValBoost</span>?</h2>
+      <p class="section-sub">How we compare to the biggest names in Valorant boosting.</p>
+      <div class="compare-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th class="us-col">&#9733; ValBoost</th>
+              <th>BoostingFactory</th>
+              <th>Boosteria</th>
+              <th>GGBoost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pricing Model</td>
+              <td class="us-col good">Per-Division Calculator</td>
+              <td class="ok">Per-Division</td>
+              <td class="ok">Per-Division</td>
+              <td class="ok">Per-Division</td>
+            </tr>
+            <tr>
+              <td>Starting Price</td>
+              <td class="us-col good">$3.99/div</td>
+              <td class="ok">~$5.00/div</td>
+              <td class="ok">~$6.00/div</td>
+              <td class="good">~$1.00/div</td>
+            </tr>
+            <tr>
+              <td>Booster Start Time</td>
+              <td class="us-col good">Within 1 Hour</td>
+              <td class="ok">1–2 Hours</td>
+              <td class="good">Within 5 min</td>
+              <td class="ok">1–3 Hours</td>
+            </tr>
+            <tr>
+              <td>VPN Protection</td>
+              <td class="us-col good">&#10003; Always On</td>
+              <td class="good">&#10003; Yes</td>
+              <td class="good">&#10003; Yes</td>
+              <td class="good">&#10003; Yes</td>
+            </tr>
+            <tr>
+              <td>Offline Mode</td>
+              <td class="us-col good">&#10003; Yes</td>
+              <td class="good">&#10003; Yes</td>
+              <td class="good">&#10003; Yes</td>
+              <td class="bad">&#8213; Optional extra</td>
+            </tr>
+            <tr>
+              <td>Win Boost + Placements</td>
+              <td class="us-col good">&#10003; Yes</td>
+              <td class="good">&#10003; Yes</td>
+              <td class="good">&#10003; Yes</td>
+              <td class="bad">&#10007; No</td>
+            </tr>
+            <tr>
+              <td>Money-Back Guarantee</td>
+              <td class="us-col good">&#10003; Full Refund</td>
+              <td class="good">&#10003; Yes</td>
+              <td class="ok">&#8213; Partial</td>
+              <td class="ok">&#8213; Partial</td>
+            </tr>
+            <tr>
+              <td>Support Hours</td>
+              <td class="us-col ok">Business Hours</td>
+              <td class="ok">Business Hours</td>
+              <td class="good">24/7</td>
+              <td class="ok">Business Hours</td>
+            </tr>
+            <tr>
+              <td>Active Promo Codes</td>
+              <td class="us-col good">&#10003; Always Active</td>
+              <td class="bad">&#8213; Rarely</td>
+              <td class="good">&#10003; Yes</td>
+              <td class="bad">&#8213; Rarely</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section class="reviews" id="reviews">
+    <div class="container">
+      <h2 class="section-title">What Our <span class="highlight">Customers Say</span></h2>
+      <div class="rating-summary">
+        <div class="rating-big">4.9</div>
+        <div class="rating-detail">
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p>Based on 1,200+ verified orders</p>
+        </div>
+      </div>
+      <div class="review-cards">
+        <div class="review-card">
+          <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p class="review-text">"Silver II to Gold III in under 36 hours. Booster was online almost instantly after I paid. The per-division price was super fair — way cheaper than other sites."</p>
+          <div class="review-author"><div class="review-avatar">JT</div><div><strong>Jake T.</strong><span>Silver → Gold</span></div></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p class="review-text">"Most professional service I've used. VPN was on, appeared offline the whole time. Finished 2 days early and my account is completely safe."</p>
+          <div class="review-author"><div class="review-avatar">MR</div><div><strong>Marcus R.</strong><span>Platinum → Diamond</span></div></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p class="review-text">"Used SAVE20 and only paid $11 for my Iron → Bronze boost. Insane value. The calculator was so easy to use — picked my ranks and got the exact price immediately."</p>
+          <div class="review-author"><div class="review-avatar">SP</div><div><strong>Sofia P.</strong><span>Iron → Bronze</span></div></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p class="review-text">"10 wins for $24.99 — delivered all 10, mostly clean stomps. Support got back to me within business hours. Already referred three friends."</p>
+          <div class="review-author"><div class="review-avatar">DK</div><div><strong>Dylan K.</strong><span>10 Win Boost</span></div></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p class="review-text">"Diamond to Ascendant in 4 days with daily progress messages. Not a single problem with my account. The exact pricing with no hidden fees is a huge plus."</p>
+          <div class="review-author"><div class="review-avatar">AL</div><div><strong>Alex L.</strong><span>Diamond → Ascendant</span></div></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p class="review-text">"Went 9/10 in placement matches. Placed way higher than I ever would have solo. Cheapest price per match I found anywhere. Already ordered rank boost too."</p>
+          <div class="review-author"><div class="review-avatar">NG</div><div><strong>Noah G.</strong><span>10 Placement Matches</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how">
+    <div class="container">
+      <h2 class="section-title">How It <span class="highlight">Works</span></h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Pick Your Ranks</h3>
+          <p>Select your current rank and your goal rank in the order form. The price updates instantly — no hidden fees.</p>
+        </div>
+        <div class="step-arrow">&#8594;</div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Secure Checkout</h3>
+          <p>Pay via Stripe — all major cards, Apple Pay, Google Pay. Your payment info is encrypted and never stored.</p>
+        </div>
+        <div class="step-arrow">&#8594;</div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Submit Details</h3>
+          <p>Get a secure encrypted email form to share your Valorant login. We activate VPN immediately on your region.</p>
+        </div>
+        <div class="step-arrow">&#8594;</div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h3>Rank Up</h3>
+          <p>Your booster starts within 1 hour. Track progress and message your booster anytime. We notify you when done.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER FORM (CALCULATOR) -->
+  <section class="order-section" id="order">
+    <div class="container">
+      <h2 class="section-title">Get Your <span class="highlight">Instant Price</span></h2>
+      <p class="section-sub">Choose your current rank and desired rank — we calculate the exact fair price in real time.</p>
+
+      <form class="order-form" id="orderForm">
+
+        <!-- RANK SUMMARY (populated from top calculator) -->
+        <div class="rank-summary" id="rankSummary">
+          <div class="rank-summary-ranks" id="rankSummaryRanks">
+            <span class="rank-summary-hint">&#8593; Use the price calculator above to select your ranks</span>
+          </div>
+          <a href="#calculator" class="rank-summary-change">Change ranks</a>
+        </div>
+
+        <!-- CONTACT INFO -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" placeholder="Enter your name" required />
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="you@email.com" required />
+          </div>
+        </div>
+
+        <!-- SERVICE TYPE -->
+        <div class="form-section-label">Service</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="serviceType">Service Type</label>
+            <select id="serviceType">
+              <option value="rank">Rank Boost</option>
+              <option value="wins-5">Win Boost — 5 Wins ($24.99)</option>
+              <option value="wins-10">Win Boost — 10 Wins ($44.99)</option>
+              <option value="wins-20">Win Boost — 20 Wins ($79.99)</option>
+              <option value="place-5">Placement Matches — 5 ($29.99)</option>
+              <option value="place-10">Placement Matches — 10 ($54.99)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="boostMode">Boost Mode</label>
+            <select id="boostMode">
+              <option value="shared">Account Shared — Booster plays your account</option>
+              <option value="selfplay">Self-Play / Duo Queue — You play, booster joins (+35%)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- PLATFORM & REGION -->
+        <div class="form-section-label">Platform &amp; Region</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="platform">Platform</label>
+            <select id="platform">
+              <option value="pc">PC</option>
+              <option value="ps5">PlayStation 5 (+10%)</option>
+              <option value="xbox">Xbox (+10%)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="region">Server Region</label>
+            <select id="region">
+              <option value="na">NA — North America</option>
+              <option value="eu">EU — Europe</option>
+              <option value="tr">TR — Turkey</option>
+              <option value="oce">OCE — Oceania (+10%)</option>
+              <option value="lan">LAN — Latin America (+10%)</option>
+              <option value="sea">SEA — Southeast Asia (+10%)</option>
+              <option value="jp">JP — Japan (+15%)</option>
+              <option value="kr">KR — Korea (+15%)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ADD-ONS (checkboxes) -->
+        <div class="form-section-label">Add-ons <span class="form-section-note">(select any that apply)</span></div>
+        <div class="addons-grid">
+          <label class="addon-check">
+            <input type="checkbox" id="addonExpress" value="0.20" />
+            <div class="addon-box">
+              <span class="addon-name">&#9889; Express Priority</span>
+              <span class="addon-pct">+20%</span>
+              <span class="addon-desc">Your order is prioritised above others</span>
+            </div>
+          </label>
+          <label class="addon-check">
+            <input type="checkbox" id="addonSolo" value="0.10" />
+            <div class="addon-box">
+              <span class="addon-name">&#127919; Solo Queue Only</span>
+              <span class="addon-pct">+10%</span>
+              <span class="addon-desc">Booster plays solo — no pre-made stacks</span>
+            </div>
+          </label>
+          <label class="addon-check">
+            <input type="checkbox" id="addonAgents" value="0.05" />
+            <div class="addon-box">
+              <span class="addon-name">&#127918; Specific Agents</span>
+              <span class="addon-pct">+5%</span>
+              <span class="addon-desc">Booster uses agents you choose</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- AGENT SELECTOR (shown when Specific Agents checked) -->
+        <div class="form-group full-width agent-select-wrap" id="agentSelectWrap" style="display:none; margin-bottom:20px;">
+          <label for="agentPref">Preferred Agents</label>
+          <input type="text" id="agentPref" placeholder="e.g. Jett, Chamber, Omen..." />
+        </div>
+
+        <div class="form-group full-width">
+          <label for="notes">Special Requests (optional)</label>
+          <textarea id="notes" rows="3" placeholder="Play schedule, specific ranks to avoid, anything else..."></textarea>
+        </div>
+
+        <!-- PROMO CODE -->
+        <div class="promo-row">
+          <div class="form-group promo-group">
+            <label for="promoCode">Promo Code</label>
+            <div class="promo-input-wrap">
+              <input type="text" id="promoCode" placeholder="e.g. SAVE20" autocomplete="off" />
+              <button type="button" class="btn-apply" id="applyPromo">Apply</button>
+            </div>
+          </div>
+          <div class="promo-result" id="promoResult"></div>
+        </div>
+
+        <!-- ORDER TOTAL -->
+        <div class="order-total" id="orderTotal">
+          <div class="total-breakdown" id="totalBreakdown">
+            <span class="breakdown-hint">&#8593; Select your ranks above to see the full price breakdown</span>
+          </div>
+          <div class="total-final">
+            <span>Total:</span>
+            <strong id="totalDisplay">$0.00</strong>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary btn-checkout" id="checkoutBtn">
+          &#128274; Proceed to Secure Checkout
+        </button>
+        <div class="checkout-badges">
+          <span>&#128274; SSL Encrypted</span>
+          <span>&#9989; Powered by Stripe</span>
+          <span>&#128176; Money-Back Guarantee</span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <div class="container">
+      <h2 class="section-title">Frequently Asked <span class="highlight">Questions</span></h2>
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-q">How is the price calculated? <span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>We charge per division climbed, with prices increasing at higher ranks to reflect the difficulty. Iron divisions cost $3.99 each, rising to $34.99 per division at Immortal. The calculator shows you the exact total instantly — no surprise fees at checkout.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">Is my account safe? <span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>Yes. Every booster uses a VPN matching your region, enables offline mode so you appear offline to friends, and plays 100% manually — no scripts, aimbots, or cheats. We have a perfect 0-ban record across 8,400+ completed orders.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">What are your support hours? <span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>Our support team operates during <strong>business hours, Monday – Friday, 9am – 6pm EST</strong>. While boosters work around the clock, queries sent outside business hours will be answered the next business day. For urgent issues, email <a href="mailto:support@valboost.gg">support@valboost.gg</a>.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">How long does a boost take? <span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>Most orders start within 1 hour. Iron–Gold boosts typically complete in 24–48 hours; Platinum–Diamond in 48–72 hours; Diamond+ takes 3–5 days. Add Express Delivery in the add-ons for priority scheduling.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">What promo codes do you have? <span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>Currently active: <strong>SAVE20</strong> (20% off), <strong>BOOST15</strong> (15% off), <strong>LOYAL10</strong> (10% off for returning customers). Enter the code in the order form before checkout to apply it automatically.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">Can I play during the boost? <span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>Not during active games — we need exclusive access to avoid conflicts. You can request scheduled play windows in the notes (e.g. "only boost midnight–8am") and we'll work around your schedule.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">What if I'm not satisfied? <span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>We offer a full money-back guarantee if we fail to deliver the ordered rank. Contact support within 48 hours of the claimed completion and we'll either complete the order or issue a full refund.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">What payment methods do you accept? <span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>All major credit and debit cards, Apple Pay, Google Pay, and more — processed securely through Stripe. We never store any payment information on our side.</p></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo">VAL<span>BOOST</span></a>
+        <p>Professional Valorant rank boosting by Radiant-level players. Fair per-division pricing, guaranteed results.</p>
+        <div class="footer-social">
+          <a href="#" class="social-btn">Discord</a>
+          <a href="#" class="social-btn">Twitter</a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Services</h4>
+        <a href="#pricing">Rank Boost</a>
+        <a href="#pricing">Win Boost</a>
+        <a href="#pricing">Placement Matches</a>
+        <a href="#order">Price Calculator</a>
+      </div>
+      <div class="footer-links">
+        <h4>Company</h4>
+        <a href="#how">How It Works</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#faq">FAQ</a>
+        <a href="mailto:support@valboost.gg">Contact</a>
+      </div>
+      <div class="footer-contact">
+        <h4>Support</h4>
+        <a href="mailto:support@valboost.gg">support@valboost.gg</a>
+        <p>Discord: ValBoost#0001</p>
+        <p class="support-hours">&#128188; Mon–Fri, 9am–6pm EST</p>
+        <p class="footer-codes">Codes: <strong>SAVE20</strong> &bull; <strong>BOOST15</strong></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 ValBoost. Not affiliated with Riot Games.</p>
+      <div class="footer-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Refund Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CHECKOUT MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <h2>Confirm Your Order</h2>
+      <p id="modalSummary" class="modal-summary-text"></p>
+      <div class="modal-price-row">
+        <span id="modalOriginal" class="modal-original"></span>
+        <span class="modal-total-val" id="modalTotal"></span>
+      </div>
+      <div class="modal-discount-badge" id="modalDiscountBadge"></div>
+      <div class="modal-info">After checkout you'll receive a secure email form to submit your Valorant details. Your booster starts within 1 hour. Support available Mon–Fri 9am–6pm EST.</div>
+      <button class="btn-primary" id="modalCheckoutBtn">&#128274; Pay Securely with Stripe</button>
+      <div class="checkout-badges">
+        <span>&#128274; SSL Secure</span>
+        <span>&#9989; Stripe</span>
+        <span>&#128176; Money-Back</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>

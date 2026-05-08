@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmed — ValoBooster</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .success-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+    .success-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 56px 48px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+    }
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+    .success-card h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+    .success-card p {
+      color: var(--muted);
+      font-size: 0.97rem;
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+    .success-steps {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 28px 0;
+      text-align: left;
+    }
+    .success-steps h3 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .success-steps li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 10px;
+      list-style: none;
+    }
+    .success-steps li span.step-num {
+      background: var(--red);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .back-btn {
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="success-wrap">
+    <div class="success-card">
+      <div class="success-icon">🎮</div>
+      <h1>Order <span class="highlight">Confirmed!</span></h1>
+      <p>Your payment was successful. A receipt has been sent to your email.</p>
+      <p>A booster will be assigned to your order shortly.</p>
+
+      <div class="success-steps">
+        <h3>What happens next</h3>
+        <ul>
+          <li><span class="step-num">1</span>Check your email — Stripe will send a payment receipt</li>
+          <li><span class="step-num">2</span>We review your order and assign a booster (usually within 1–2 hours during business hours)</li>
+          <li><span class="step-num">3</span>You'll be contacted via the email you provided with login details or lobby invite</li>
+        </ul>
+      </div>
+
+      <a href="/" class="btn-primary back-btn">Back to ValoBooster</a>
+    </div>
+  </div>
+</body>
+</html>
