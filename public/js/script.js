@@ -456,46 +456,13 @@ document.getElementById('orderForm').addEventListener('submit', e => {
 });
 
 // ============================================================
-// DISCORD NOTIFICATION
-// ============================================================
-async function notifyDiscord(order) {
-  const webhook = window.VBCONFIG?.discordWebhook;
-  if (!webhook || webhook.includes('YOUR_')) return;
-  try {
-    const fields = [
-      { name: '📦 Service',  value: order.service,  inline: true  },
-      { name: '💰 Total',    value: `$${order.total}`, inline: true },
-      { name: '📧 Email',    value: order.email || '—', inline: false },
-      { name: '⚙️ Options',  value: order.options,  inline: false },
-    ];
-    if (order.addons) fields.push({ name: '➕ Add-ons', value: order.addons, inline: false });
-    if (order.promo)  fields.push({ name: '🏷️ Promo',  value: order.promo,  inline: true  });
-    await fetch(webhook, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: 'ValoBooster Orders',
-        avatar_url: 'https://i.imgur.com/AfFp7pu.png',
-        embeds: [{
-          title: '🎮 New Order — Checkout Started',
-          color: 0xff4655,
-          fields,
-          footer: { text: 'ValoBooster • Customer sent to Stripe checkout' },
-          timestamp: new Date().toISOString(),
-        }],
-      }),
-    });
-  } catch (e) { /* silent fail — don't block checkout */ }
-}
-
-// ============================================================
-// STRIPE CHECKOUT (via Netlify serverless function)
+// STRIPE CHECKOUT
 // ============================================================
 modalCheckout.addEventListener('click', async () => {
-  const svc       = modalCheckout.dataset.svc;
-  const email     = document.getElementById('email').value.trim();
-  const totalText = document.getElementById('totalDisplay').textContent;
-  const total     = parseFloat(totalText.replace('$', ''));
+  const svc         = modalCheckout.dataset.svc;
+  const email       = document.getElementById('email').value.trim();
+  const totalText   = document.getElementById('totalDisplay').textContent;
+  const total       = parseFloat(totalText.replace('$', ''));
   const amountCents = Math.round(total * 100);
 
   if (!amountCents || amountCents < 100) {
@@ -503,7 +470,6 @@ modalCheckout.addEventListener('click', async () => {
     return;
   }
 
-  // Build descriptions
   const modeName   = boostModeSel?.selectedOptions[0]?.text?.split(' —')[0] || '';
   const platName   = platformSel?.selectedOptions[0]?.text || '';
   const regName    = regionSel?.selectedOptions[0]?.text || '';
@@ -520,17 +486,6 @@ modalCheckout.addEventListener('click', async () => {
     ? `${fromRankSel.value}_to_${toRankSel.value}`
     : svc;
 
-  // Notify Discord (fire-and-forget)
-  notifyDiscord({
-    service: serviceDesc,
-    total:   total.toFixed(2),
-    email:   email || '(not entered)',
-    options: `${modeName} | ${platName} | ${regName}`,
-    addons:  addonNames,
-    promo:   activeCode || null,
-  });
-
-  // Show loading state
   modalCheckout.disabled = true;
   modalCheckout.textContent = 'Redirecting to payment…';
 
@@ -538,7 +493,15 @@ modalCheckout.addEventListener('click', async () => {
     const res = await fetch('/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amountCents, email, description: serviceDesc, reference }),
+      body: JSON.stringify({
+        amountCents,
+        email,
+        description: serviceDesc,
+        reference,
+        options: `${modeName} | ${platName} | ${regName}`,
+        addons:  addonNames,
+        promo:   activeCode || null,
+      }),
     });
     const data = await res.json();
     if (data.url) {
