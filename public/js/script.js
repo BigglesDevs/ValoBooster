@@ -38,7 +38,7 @@ async function loadRankIcons() {
     const tiers = json.data[json.data.length - 1].tiers;
     tiers.forEach(t => {
       const name = TIER_TO_RANK[t.tier];
-      if (name && t.largeIcon) RANK_ICONS[name] = t.largeIcon;
+      if (name && t.rankTriangleUpIcon) RANK_ICONS[name] = t.rankTriangleUpIcon;
     });
     // Refresh icons if ranks already selected
     setRankIcon(document.getElementById('fromRankIcon'), document.getElementById('fromRank')?.value);
