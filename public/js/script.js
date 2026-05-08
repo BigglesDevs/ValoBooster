@@ -140,7 +140,7 @@ const REGION_LABEL = {
 const ADDON_IDS = ['addonExpress','addonSolo','addonAgents'];
 const ADDON_LABEL = {
   addonExpress: 'Express Priority',
-  addonSolo:    'Solo Queue Only',
+  addonSolo:    'Bring a Duo Friend',
   addonAgents:  'Specific Agents',
 };
 
