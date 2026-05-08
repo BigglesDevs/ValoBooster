@@ -2,6 +2,53 @@
 // All sensitive values live there — do not hardcode them here.
 
 // ============================================================
+// RANK ICONS — fetched from valorant-api.com on load
+// ============================================================
+const TIER_TO_RANK = {
+  3:'Iron I',      4:'Iron II',      5:'Iron III',
+  6:'Bronze I',    7:'Bronze II',    8:'Bronze III',
+  9:'Silver I',   10:'Silver II',   11:'Silver III',
+ 12:'Gold I',     13:'Gold II',     14:'Gold III',
+ 15:'Platinum I', 16:'Platinum II', 17:'Platinum III',
+ 18:'Diamond I',  19:'Diamond II',  20:'Diamond III',
+ 21:'Ascendant I',22:'Ascendant II',23:'Ascendant III',
+ 24:'Immortal I', 25:'Immortal II', 26:'Immortal III',
+ 27:'Radiant',
+};
+
+let RANK_ICONS = {};
+
+function setRankIcon(imgEl, rankName) {
+  const url = RANK_ICONS[rankName];
+  if (url && imgEl) {
+    imgEl.src = url;
+    imgEl.style.display = 'block';
+    imgEl.closest('.rank-sel-wrap')?.classList.add('has-icon');
+  } else if (imgEl) {
+    imgEl.src = '';
+    imgEl.style.display = 'none';
+    imgEl.closest('.rank-sel-wrap')?.classList.remove('has-icon');
+  }
+}
+
+async function loadRankIcons() {
+  try {
+    const res  = await fetch('https://valorant-api.com/v1/competitivetiers');
+    const json = await res.json();
+    const tiers = json.data[json.data.length - 1].tiers;
+    tiers.forEach(t => {
+      const name = TIER_TO_RANK[t.tier];
+      if (name && t.smallIcon) RANK_ICONS[name] = t.smallIcon;
+    });
+    // Refresh icons if ranks already selected
+    setRankIcon(document.getElementById('fromRankIcon'), document.getElementById('fromRank')?.value);
+    setRankIcon(document.getElementById('toRankIcon'),   document.getElementById('toRank')?.value);
+  } catch (e) {
+    console.warn('Could not load rank icons:', e.message);
+  }
+}
+
+// ============================================================
 // RANK LADDER — every division in order, lowest to highest
 // ============================================================
 const RANKS = [
@@ -157,6 +204,8 @@ const rankSummaryEl  = document.getElementById('rankSummaryRanks');
 function updateCalc() {
   const from = fromRankSel.value;
   const to   = toRankSel.value;
+  setRankIcon(document.getElementById('fromRankIcon'), from);
+  setRankIcon(document.getElementById('toRankIcon'),   to);
 
   if (!from || !to) {
     calcHeroPrice.textContent = '—';
@@ -195,10 +244,12 @@ function updateRankSummary() {
   const from = fromRankSel.value;
   const to   = toRankSel.value;
   if (from && to && rankBasePrice > 0) {
+    const fi = RANK_ICONS[from] ? `<img class="rsumm-icon" src="${RANK_ICONS[from]}" alt="${from}">` : '';
+    const ti = RANK_ICONS[to]   ? `<img class="rsumm-icon" src="${RANK_ICONS[to]}"   alt="${to}">` : '';
     rankSummaryEl.innerHTML =
-      `<span class="rsumm-from">${from}</span>` +
+      `<span class="rsumm-from">${fi}${from}</span>` +
       `<span class="rsumm-arrow">&#8594;</span>` +
-      `<span class="rsumm-to">${to}</span>` +
+      `<span class="rsumm-to">${ti}${to}</span>` +
       `<span class="rsumm-price">£${rankBasePrice.toFixed(2)} base</span>`;
   } else {
     rankSummaryEl.innerHTML = '<span class="rank-summary-hint">&#8593; Use the price calculator above to select your ranks</span>';
@@ -525,3 +576,6 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
   });
 });
+
+// Fetch Valorant rank icons on load
+loadRankIcons();
