@@ -17,7 +17,7 @@ const RANKS = [
 ];
 
 // Cost to go from RANKS[i] to RANKS[i+1] — 24 steps
-// Calibrated so Iron I → Gold II ≈ $90, matching market leaders
+// Calibrated so Iron I → Gold II ≈ £90, matching market leaders
 const DIV_PRICE = [
   6.49, 6.49,  // Iron I→II, II→III
   6.49,        // Iron III→Bronze I
@@ -184,7 +184,7 @@ function updateCalc() {
   calcHeroPrice.style.fontSize = '2rem';
   rankBasePrice = calcRankPrice(from, to);
   const divs = ti - fi;
-  calcHeroPrice.textContent = '$' + rankBasePrice.toFixed(2);
+  calcHeroPrice.textContent = '£' + rankBasePrice.toFixed(2);
   calcHeroDivs.textContent  = divs + ' division' + (divs !== 1 ? 's' : '') + ' to climb';
   updateRankSummary();
   updateOrderTotal();
@@ -199,7 +199,7 @@ function updateRankSummary() {
       `<span class="rsumm-from">${from}</span>` +
       `<span class="rsumm-arrow">&#8594;</span>` +
       `<span class="rsumm-to">${to}</span>` +
-      `<span class="rsumm-price">$${rankBasePrice.toFixed(2)} base</span>`;
+      `<span class="rsumm-price">£${rankBasePrice.toFixed(2)} base</span>`;
   } else {
     rankSummaryEl.innerHTML = '<span class="rank-summary-hint">&#8593; Use the price calculator above to select your ranks</span>';
   }
@@ -278,7 +278,7 @@ function updateOrderTotal() {
   }
 
   if (base === 0) {
-    totalDisplay.textContent = '$0.00';
+    totalDisplay.textContent = '£0.00';
     totalBreakdown.innerHTML = '<span class="breakdown-hint">&#8593; Select your ranks above to see the price breakdown</span>';
     return 0;
   }
@@ -297,30 +297,30 @@ function updateOrderTotal() {
 
   // Build breakdown HTML
   let html = `<span><strong>${label}</strong></span>`;
-  html += `<span>Base: $${base.toFixed(2)}</span>`;
+  html += `<span>Base: £${base.toFixed(2)}</span>`;
 
   if (modeMult !== 1) {
     const mode = boostModeSel.value === 'selfplay' ? 'Self-Play/Duo' : '';
-    html += `<span>${mode}: +35% (+$${(base * modeMult - base).toFixed(2)})</span>`;
+    html += `<span>${mode}: +35% (+£${(base * modeMult - base).toFixed(2)})</span>`;
   }
   if (platMult !== 1) {
     const plat = platformSel.value.toUpperCase();
-    html += `<span>${plat}: +10% (+$${(base * platMult - base).toFixed(2)})</span>`;
+    html += `<span>${plat}: +10% (+£${(base * platMult - base).toFixed(2)})</span>`;
   }
   if (regMult !== 1) {
     const reg   = REGION_LABEL[regionSel.value] || '';
     const pct   = Math.round((regMult - 1) * 100);
-    html += `<span>Region ${reg}: +${pct}% (+$${(base * regMult - base).toFixed(2)})</span>`;
+    html += `<span>Region ${reg}: +${pct}% (+£${(base * regMult - base).toFixed(2)})</span>`;
   }
   addonLines.forEach(a => {
-    html += `<span>${a.label}: +${Math.round(a.pct * 100)}% (+$${a.amt.toFixed(2)})</span>`;
+    html += `<span>${a.label}: +${Math.round(a.pct * 100)}% (+£${a.amt.toFixed(2)})</span>`;
   });
   if (activeDiscount > 0) {
-    html += `<span class="discount-line">Code ${activeCode}: -${Math.round(activeDiscount * 100)}% (-$${discountAmt.toFixed(2)})</span>`;
+    html += `<span class="discount-line">Code ${activeCode}: -${Math.round(activeDiscount * 100)}% (-£${discountAmt.toFixed(2)})</span>`;
   }
 
   totalBreakdown.innerHTML = html;
-  totalDisplay.textContent = '$' + total.toFixed(2);
+  totalDisplay.textContent = '£' + total.toFixed(2);
   return total;
 }
 
@@ -401,14 +401,14 @@ function openModal(total, label) {
   modalSummary.textContent = label + modeText + platText + regText;
 
   if (activeDiscount > 0 && beforeDiscount !== total) {
-    modalOriginal.textContent = '$' + beforeDiscount.toFixed(2);
-    modalDiscount.textContent = `${activeCode}: ${Math.round(activeDiscount * 100)}% off — saved $${(beforeDiscount - total).toFixed(2)}`;
+    modalOriginal.textContent = '£' + beforeDiscount.toFixed(2);
+    modalDiscount.textContent = `${activeCode}: ${Math.round(activeDiscount * 100)}% off — saved £${(beforeDiscount - total).toFixed(2)}`;
   } else {
     modalOriginal.textContent = '';
     modalDiscount.textContent = '';
   }
 
-  modalTotalEl.textContent  = '$' + total.toFixed(2);
+  modalTotalEl.textContent  = '£' + total.toFixed(2);
   modalCheckout.dataset.svc = svcType;
   modalOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -462,7 +462,7 @@ modalCheckout.addEventListener('click', async () => {
   const svc         = modalCheckout.dataset.svc;
   const email       = document.getElementById('email').value.trim();
   const totalText   = document.getElementById('totalDisplay').textContent;
-  const total       = parseFloat(totalText.replace('$', ''));
+  const total       = parseFloat(totalText.replace('£', ''));
   const amountCents = Math.round(total * 100);
 
   if (!amountCents || amountCents < 100) {

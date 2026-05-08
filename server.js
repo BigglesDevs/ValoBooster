@@ -26,7 +26,7 @@ app.post('/create-checkout', async (req, res) => {
 
   const params = new URLSearchParams();
   params.append('payment_method_types[]',                        'card');
-  params.append('line_items[0][price_data][currency]',           'usd');
+  params.append('line_items[0][price_data][currency]',           'gbp');
   params.append('line_items[0][price_data][unit_amount]',        String(amountCents));
   params.append('line_items[0][price_data][product_data][name]', description || 'Valorant Boost');
   params.append('line_items[0][quantity]',                       '1');
