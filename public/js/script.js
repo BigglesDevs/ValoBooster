@@ -63,6 +63,13 @@ async function loadRankIcons() {
         img.style.display = 'block';
       }
     });
+
+    // Hero badge
+    const heroBadge = document.getElementById('heroBadgeImg');
+    if (heroBadge && RANK_ICONS['Diamond I']) {
+      heroBadge.src = RANK_ICONS['Diamond I'];
+      heroBadge.style.display = 'block';
+    }
   } catch (e) {
     console.warn('Could not load rank icons:', e.message);
   }

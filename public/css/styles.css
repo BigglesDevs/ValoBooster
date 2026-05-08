@@ -79,6 +79,7 @@ ul { list-style: none; }
 .rank-badge-wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; }
 .rank-badge { width: 240px; height: 240px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 4px solid var(--diamond-c); box-shadow: 0 0 60px rgba(79,195,247,0.3), 0 0 120px rgba(79,195,247,0.1); background: radial-gradient(circle at 30% 30%, #1e3a5f, #0f1117); animation: pulse 3s ease-in-out infinite; }
 .badge-icon { font-size: 5rem; line-height: 1; }
+.badge-rank-img { display: none; width: 150px; height: 150px; object-fit: contain; filter: drop-shadow(0 0 16px rgba(79,195,247,0.6)); }
 .badge-label { font-size: 1rem; font-weight: 900; letter-spacing: 4px; color: var(--diamond-c); margin-top: 8px; }
 @keyframes pulse {
   0%,100% { box-shadow: 0 0 60px rgba(79,195,247,0.3), 0 0 120px rgba(79,195,247,0.1); }
@@ -94,6 +95,7 @@ ul { list-style: none; }
   .hero-visual { order: -1; }
   .rank-badge { width: 160px; height: 160px; }
   .badge-icon { font-size: 3rem; }
+  .badge-rank-img { width: 100px; height: 100px; }
 }
 
 /* ===== TRUST BAR ===== */
