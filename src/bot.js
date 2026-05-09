@@ -37,20 +37,27 @@ async function sendViaWebhook(order) {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl || webhookUrl.includes('YOUR_')) return;
 
-  await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      username: 'ValoBooster Orders',
-      embeds: [{
-        title: '🎮 New Order — Checkout Started',
-        color: 0xff4655,
-        fields: buildEmbedPayload(order),
-        footer: { text: 'ValoBooster • Customer sent to Stripe checkout' },
-        timestamp: new Date().toISOString(),
-      }],
-    }),
-  });
+  const controller = new AbortController();
+  const timeout    = setTimeout(() => controller.abort(), 5_000);
+  try {
+    await fetch(webhookUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        username: 'ValoBooster Orders',
+        embeds: [{
+          title:     '🎮 New Order — Checkout Started',
+          color:     0xff4655,
+          fields:    buildEmbedPayload(order),
+          footer:    { text: 'ValoBooster • Customer sent to Stripe checkout' },
+          timestamp: new Date().toISOString(),
+        }],
+      }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function sendOrderNotification(order) {

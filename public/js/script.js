@@ -33,13 +33,20 @@ function setRankIcon(imgEl, rankName) {
 
 async function loadRankIcons() {
   try {
-    const res  = await fetch('https://valorant-api.com/v1/competitivetiers');
-    const json = await res.json();
-    const tiers = json.data[json.data.length - 1].tiers;
-    tiers.forEach(t => {
-      const name = TIER_TO_RANK[t.tier];
-      if (name && t.largeIcon) RANK_ICONS[name] = t.largeIcon;
-    });
+    const CACHE_KEY = 'vb_rank_icons_v1';
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      RANK_ICONS = JSON.parse(cached);
+    } else {
+      const res   = await fetch('https://valorant-api.com/v1/competitivetiers');
+      const json  = await res.json();
+      const tiers = json.data[json.data.length - 1].tiers;
+      tiers.forEach(t => {
+        const name = TIER_TO_RANK[t.tier];
+        if (name && t.largeIcon) RANK_ICONS[name] = t.largeIcon;
+      });
+      try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(RANK_ICONS)); } catch (_) {}
+    }
     // Refresh dropdown icons if ranks already selected
     setRankIcon(document.getElementById('fromRankIcon'), document.getElementById('fromRank')?.value);
     setRankIcon(document.getElementById('toRankIcon'),   document.getElementById('toRank')?.value);
@@ -89,6 +96,9 @@ const RANKS = [
   'Immortal I',   'Immortal II',   'Immortal III',
   'Radiant',
 ];
+
+// O(1) rank position lookup — avoids repeated indexOf scans
+const RANK_INDEX = new Map(RANKS.map((r, i) => [r, i]));
 
 // Cost to go from RANKS[i] to RANKS[i+1] — 24 steps
 // Calibrated so Iron I → Gold II ≈ £90, matching market leaders
@@ -160,8 +170,8 @@ let rankBasePrice  = 0;  // set by rank calculator
 // UTILITY: calculate price between two ranks
 // ============================================================
 function calcRankPrice(from, to) {
-  const fi = RANKS.indexOf(from);
-  const ti = RANKS.indexOf(to);
+  const fi = RANK_INDEX.get(from) ?? -1;
+  const ti = RANK_INDEX.get(to)   ?? -1;
   if (fi < 0 || ti < 0 || ti <= fi) return 0;
   let total = 0;
   for (let i = fi; i < ti; i++) total += DIV_PRICE[i];
@@ -466,7 +476,8 @@ function openModal(total, label) {
 
   const platText = platformSel ? ` | ${platformSel.value.toUpperCase()}` : '';
   const regText  = regionSel ? ` | ${REGION_LABEL[regionSel.value]}` : '';
-  modalSummary.textContent = label + ' — Duo Queue' + platText + regText;
+  const duoText  = document.getElementById('addonSolo')?.checked ? ' — Duo Queue' : '';
+  modalSummary.textContent = label + duoText + platText + regText;
 
   if (activeDiscount > 0 && beforeDiscount !== total) {
     modalOriginal.textContent = '£' + beforeDiscount.toFixed(2);
