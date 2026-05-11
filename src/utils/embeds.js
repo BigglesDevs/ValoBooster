@@ -60,11 +60,11 @@ function orderEmbed(order) {
   if (order.promo)  fields.push({ name: '🏷️ Promo',  value: order.promo,  inline: true  });
 
   return new EmbedBuilder()
-    .setTitle('🎮 New Order — Checkout Started')
+    .setTitle('🎮 New Order — Payment Confirmed')
     .setColor(BRAND_COLOR)
     .addFields(fields)
     .setTimestamp()
-    .setFooter({ text: 'ValoBooster • Customer sent to Stripe checkout' });
+    .setFooter({ text: 'ValoBooster • Payment successfully received' });
 }
 
 module.exports = { welcomeEmbed, ticketPanelEmbed, ticketOpenEmbed, orderEmbed, TICKET_TYPES };
