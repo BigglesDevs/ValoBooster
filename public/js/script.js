@@ -126,14 +126,11 @@ const PLATFORM_MULT = { pc: 1.00, ps5: 1.10, xbox: 1.10 };
 
 // Region multipliers
 const REGION_MULT = {
-  na: 1.00, eu: 1.00, tr: 1.00,
-  oce: 1.10, lan: 1.10, sea: 1.10,
-  jp: 1.15, kr: 1.15,
+  na: 1.00, eu: 1.00,
 };
 
 const REGION_LABEL = {
-  na: 'NA', eu: 'EU', tr: 'TR',
-  oce: 'OCE', lan: 'LAN', sea: 'SEA', jp: 'JP', kr: 'KR',
+  na: 'NA', eu: 'EU',
 };
 
 // Addon IDs → percent values (read from checkbox value)
