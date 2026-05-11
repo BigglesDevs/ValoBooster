@@ -2,6 +2,9 @@
 .env
 public/js/config.js
 
+# Dependencies
+node_modules/
+
 # OS junk
 .DS_Store
 Thumbs.db
