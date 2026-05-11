@@ -34,7 +34,7 @@ async function openTicket(interaction, type) {
 
   const ticketName = `${t.emoji.name ?? type}-${user.username.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
 
-  const category = await getOrCreateCategory(guild, `${t.emoji} ${t.label} Tickets`);
+  const category = await getOrCreateCategory(guild, `${t.emoji}│${t.label.toUpperCase()} TICKETS`);
 
   const staffRoleId = process.env.STAFF_ROLE_ID;
   const permOverwrites = [
