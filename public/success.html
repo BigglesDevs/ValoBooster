@@ -102,5 +102,15 @@
       <a href="/" class="btn-primary back-btn">Back to ValoBooster</a>
     </div>
   </div>
+  <script>
+    const sessionId = new URLSearchParams(window.location.search).get('session_id');
+    if (sessionId) {
+      fetch('/verify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      }).catch(() => {});
+    }
+  </script>
 </body>
 </html>

@@ -5,6 +5,7 @@ const path    = require('path');
 const bot     = require('./src/bot');
 
 const app = express();
+const notifiedSessions = new Set();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -33,7 +34,7 @@ app.post('/create-checkout', async (req, res) => {
   params.append('line_items[0][price_data][product_data][name]', description || 'Valorant Boost');
   params.append('line_items[0][quantity]',                       '1');
   params.append('mode',                                          'payment');
-  params.append('success_url',  `${siteUrl}/success.html?ref=${encodeURIComponent(reference || '')}`);
+  params.append('success_url',  `${siteUrl}/success.html?ref=${encodeURIComponent(reference || '')}&session_id={CHECKOUT_SESSION_ID}`);
   params.append('cancel_url',   siteUrl);
   if (email)     params.append('customer_email',      email);
   if (reference) params.append('client_reference_id', reference);
@@ -66,6 +67,48 @@ app.post('/create-checkout', async (req, res) => {
     res.json({ url: session.url });
   } catch (err) {
     console.error('Server error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/verify-payment', async (req, res) => {
+  const { sessionId } = req.body;
+  if (!sessionId) return res.status(400).json({ error: 'Missing sessionId' });
+
+  if (notifiedSessions.has(sessionId)) {
+    return res.json({ ok: true, alreadyNotified: true });
+  }
+
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) return res.status(500).json({ error: 'Stripe not configured' });
+
+  try {
+    const response = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`, {
+      headers: { 'Authorization': `Bearer ${secretKey}` },
+    });
+    const session = await response.json();
+
+    if (!response.ok || session.payment_status !== 'paid') {
+      return res.status(402).json({ error: 'Payment not confirmed' });
+    }
+
+    notifiedSessions.add(sessionId);
+
+    const meta        = session.metadata || {};
+    const amountCents = session.amount_total ?? parseInt(meta.amount_cents, 10) ?? 0;
+
+    bot.sendOrderNotification({
+      service: meta.service || 'Valorant Boost',
+      total:   (amountCents / 100).toFixed(2),
+      email:   session.customer_email || meta.email || '(not entered)',
+      options: meta.options || '—',
+      addons:  meta.addons  || null,
+      promo:   meta.promo   || null,
+    });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('verify-payment error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
