@@ -3,11 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "bot": "node src/claude-bot.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.30.0",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
     "express": "^4.19.2"
