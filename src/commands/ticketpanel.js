@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { ticketPanelEmbed } = require('../utils/embeds');
 const { isStaff } = require('../utils/permissions');
 
@@ -14,11 +14,23 @@ module.exports = {
     }
 
     const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('open_ticket')
-        .setLabel('Open Ticket')
-        .setEmoji('🎫')
-        .setStyle(ButtonStyle.Danger)
+      new StringSelectMenuBuilder()
+        .setCustomId('ticket_select')
+        .setPlaceholder('🎫 Select a category!')
+        .addOptions([
+          {
+            label: 'Payment',
+            description: 'Billing, orders, refunds & transactions',
+            value: 'payment',
+            emoji: '💳',
+          },
+          {
+            label: 'Support',
+            description: 'Technical help & troubleshooting',
+            value: 'support',
+            emoji: '🔧',
+          },
+        ])
     );
 
     await interaction.channel.send({ embeds: [ticketPanelEmbed()], components: [row] });

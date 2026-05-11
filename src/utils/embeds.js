@@ -2,6 +2,11 @@ const { EmbedBuilder } = require('discord.js');
 
 const BRAND_COLOR = 0xff4655;
 
+const TICKET_TYPES = {
+  payment: { label: 'Payment',  emoji: '💳', description: 'Billing, orders, refunds & transactions' },
+  support: { label: 'Support',  emoji: '🔧', description: 'Technical help & troubleshooting' },
+};
+
 function welcomeEmbed(member, channels) {
   return new EmbedBuilder()
     .setTitle(`👋 Welcome to ValoBooster, ${member.user.username}!`)
@@ -22,17 +27,21 @@ function ticketPanelEmbed() {
     .setTitle('🎫 Open a Support Ticket')
     .setDescription(
       'Need help with your order or have a question?\n\n' +
-      'Click the button below and a private support channel will be created just for you.'
+      '**💳 Payment** — Billing, orders, refunds & transactions\n' +
+      '**🔧 Support** — Technical help & troubleshooting\n\n' +
+      'Select a category below to open a ticket.'
     )
     .setColor(BRAND_COLOR)
-    .setFooter({ text: 'ValoBooster Support' });
+    .setFooter({ text: 'ValoBooster Support • Max 3 open tickets per user' });
 }
 
-function ticketOpenEmbed(user) {
+function ticketOpenEmbed(user, type) {
+  const t = TICKET_TYPES[type] ?? TICKET_TYPES.support;
   return new EmbedBuilder()
-    .setTitle('🎫 Ticket Opened')
+    .setTitle(`${t.emoji} ${t.label} Ticket`)
     .setDescription(
       `Hello ${user}, a staff member will be with you shortly.\n\n` +
+      `**Category:** ${t.description}\n\n` +
       `Please describe your issue below.`
     )
     .setColor(BRAND_COLOR)
@@ -58,4 +67,4 @@ function orderEmbed(order) {
     .setFooter({ text: 'ValoBooster • Customer sent to Stripe checkout' });
 }
 
-module.exports = { welcomeEmbed, ticketPanelEmbed, ticketOpenEmbed, orderEmbed };
+module.exports = { welcomeEmbed, ticketPanelEmbed, ticketOpenEmbed, orderEmbed, TICKET_TYPES };
