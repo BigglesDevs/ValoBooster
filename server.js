@@ -1,9 +1,11 @@
 require('dotenv').config();
 const express = require('express');
+const crypto  = require('crypto');
 const path    = require('path');
 const bot     = require('./src/bot');
 
 const app = express();
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -36,6 +38,14 @@ app.post('/create-checkout', async (req, res) => {
   if (email)     params.append('customer_email',      email);
   if (reference) params.append('client_reference_id', reference);
 
+  // Store order details in metadata so the webhook can read them after payment succeeds
+  params.append('metadata[service]',      description || 'Valorant Boost');
+  params.append('metadata[amount_cents]', String(amountCents));
+  if (email)   params.append('metadata[email]',   email);
+  if (options) params.append('metadata[options]', String(options));
+  if (addons)  params.append('metadata[addons]',  typeof addons === 'string' ? addons : JSON.stringify(addons));
+  if (promo)   params.append('metadata[promo]',   typeof promo  === 'string' ? promo  : JSON.stringify(promo));
+
   try {
     const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
@@ -53,21 +63,58 @@ app.post('/create-checkout', async (req, res) => {
       return res.status(502).json({ error: session.error?.message || 'Stripe error' });
     }
 
-    // Notify Discord (non-blocking)
-    bot.sendOrderNotification({
-      service: description || 'Valorant Boost',
-      total:   (amountCents / 100).toFixed(2),
-      email:   email || '(not entered)',
-      options: options || '—',
-      addons:  addons || null,
-      promo:   promo  || null,
-    });
-
     res.json({ url: session.url });
   } catch (err) {
     console.error('Server error:', err);
     res.status(500).json({ error: 'Server error' });
   }
+});
+
+// Stripe sends the raw body — must not use express.json() on this route
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const sig           = req.headers['stripe-signature'];
+  const payload       = req.body.toString('utf8');
+
+  let event;
+  try {
+    if (webhookSecret && sig) {
+      const parts = {};
+      for (const part of sig.split(',')) {
+        const [k, v] = part.split('=');
+        parts[k] = v;
+      }
+      const expected = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(`${parts.t}.${payload}`)
+        .digest('hex');
+      if (expected !== parts.v1) {
+        return res.status(400).json({ error: 'Invalid signature' });
+      }
+    }
+    event = JSON.parse(payload);
+  } catch (err) {
+    console.error('Webhook parse error:', err.message);
+    return res.status(400).json({ error: 'Bad request' });
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session     = event.data.object;
+    const meta        = session.metadata || {};
+    const amountCents = session.amount_total ?? parseInt(meta.amount_cents, 10) ?? 0;
+
+    // Notify Discord only after payment is confirmed
+    bot.sendOrderNotification({
+      service: meta.service || 'Valorant Boost',
+      total:   (amountCents / 100).toFixed(2),
+      email:   session.customer_email || meta.email || '(not entered)',
+      options: meta.options || '—',
+      addons:  meta.addons  || null,
+      promo:   meta.promo   || null,
+    });
+  }
+
+  res.json({ received: true });
 });
 
 const PORT = process.env.PORT || 3000;
