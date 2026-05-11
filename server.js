@@ -3,6 +3,7 @@ const express = require('express');
 const crypto  = require('crypto');
 const path    = require('path');
 const bot     = require('./src/bot');
+const { sendOrderEmail } = require('./src/utils/mailer');
 
 const app = express();
 const notifiedSessions = new Set();
@@ -97,14 +98,18 @@ app.post('/verify-payment', async (req, res) => {
     const meta        = session.metadata || {};
     const amountCents = session.amount_total ?? parseInt(meta.amount_cents, 10) ?? 0;
 
-    bot.sendOrderNotification({
+    const customerEmail = session.customer_email || meta.email;
+    const order = {
       service: meta.service || 'Valorant Boost',
       total:   (amountCents / 100).toFixed(2),
-      email:   session.customer_email || meta.email || '(not entered)',
+      email:   customerEmail || '(not entered)',
       options: meta.options || '—',
       addons:  meta.addons  || null,
       promo:   meta.promo   || null,
-    });
+    };
+
+    bot.sendOrderNotification(order);
+    if (customerEmail) sendOrderEmail(customerEmail, order).catch(err => console.error('Email error:', err.message));
 
     res.json({ ok: true });
   } catch (err) {
