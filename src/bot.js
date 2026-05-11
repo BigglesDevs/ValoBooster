@@ -1,10 +1,139 @@
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const {
+  Client, GatewayIntentBits, EmbedBuilder,
+  ChannelType, PermissionFlagsBits, ActionRowBuilder,
+  ButtonBuilder, ButtonStyle,
+} = require('discord.js');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.MessageContent,
+  ],
+});
 
 client.once('ready', () => {
   console.log(`Discord bot logged in as ${client.user.tag}`);
 });
+
+// ─── WELCOME ────────────────────────────────────────────────────────────────
+
+client.on('guildMemberAdd', async (member) => {
+  const channel = member.guild.channels.cache.find(c => c.name.includes('welcome'));
+  if (!channel) return;
+
+  const embed = new EmbedBuilder()
+    .setTitle(`👋 Welcome to ValoBooster, ${member.user.username}!`)
+    .setDescription(
+      `We're the **#1 Valorant rank boosting service**.\n\n` +
+      `• Check <#${getChannel(member.guild, 'rules')}> to get started\n` +
+      `• Head to <#${getChannel(member.guild, 'how-to-order')}> to place an order\n` +
+      `• Use <#${getChannel(member.guild, 'open-a-ticket')}> if you need support`
+    )
+    .setColor(0xff4655)
+    .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+    .setFooter({ text: 'ValoBooster • Fast. Safe. Guaranteed.' })
+    .setTimestamp();
+
+  await channel.send({ embeds: [embed] });
+});
+
+// ─── TICKET SYSTEM ──────────────────────────────────────────────────────────
+
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return;
+
+  // Post the ticket panel when staff types !ticketpanel in any channel
+  if (message.content === '!ticketpanel' && message.member?.permissions.has(PermissionFlagsBits.ManageChannels)) {
+    await message.delete().catch(() => {});
+
+    const embed = new EmbedBuilder()
+      .setTitle('🎫 Open a Support Ticket')
+      .setDescription(
+        'Need help with your order or have a question?\n\n' +
+        'Click the button below and a private channel will be created for you.'
+      )
+      .setColor(0xff4655)
+      .setFooter({ text: 'ValoBooster Support' });
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('open_ticket')
+        .setLabel('Open Ticket')
+        .setEmoji('🎫')
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    await message.channel.send({ embeds: [embed], components: [row] });
+  }
+});
+
+client.on('interactionCreate', async (interaction) => {
+  // ── Open ticket ──
+  if (interaction.isButton() && interaction.customId === 'open_ticket') {
+    const guild = interaction.guild;
+    const user  = interaction.user;
+    const ticketName = `ticket-${user.username.toLowerCase().replace(/\s+/g, '-')}`;
+
+    const existing = guild.channels.cache.find(c => c.name === ticketName);
+    if (existing) {
+      return interaction.reply({ content: `You already have an open ticket: ${existing}`, ephemeral: true });
+    }
+
+    // Find SUPPORT category
+    const category = guild.channels.cache.find(
+      c => c.type === ChannelType.GuildCategory && c.name.toLowerCase().includes('support')
+    );
+
+    const ticketChannel = await guild.channels.create({
+      name: ticketName,
+      type: ChannelType.GuildText,
+      parent: category?.id,
+      permissionOverwrites: [
+        { id: guild.roles.everyone, deny: [PermissionFlagsBits.ViewChannel] },
+        { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+      ],
+    });
+
+    const embed = new EmbedBuilder()
+      .setTitle('🎫 Ticket Opened')
+      .setDescription(`Hello ${user}, a staff member will be with you shortly.\n\nDescribe your issue below.`)
+      .setColor(0xff4655)
+      .setFooter({ text: 'Click Close Ticket when your issue is resolved.' })
+      .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('close_ticket')
+        .setLabel('Close Ticket')
+        .setEmoji('🔒')
+        .setStyle(ButtonStyle.Secondary)
+    );
+
+    await ticketChannel.send({ content: `${user}`, embeds: [embed], components: [row] });
+    await interaction.reply({ content: `Ticket created: ${ticketChannel}`, ephemeral: true });
+  }
+
+  // ── Close ticket ──
+  if (interaction.isButton() && interaction.customId === 'close_ticket') {
+    const channel = interaction.channel;
+
+    const embed = new EmbedBuilder()
+      .setTitle('🔒 Ticket Closing')
+      .setDescription('This ticket will be deleted in 5 seconds.')
+      .setColor(0xff4655);
+
+    await interaction.reply({ embeds: [embed] });
+    setTimeout(() => channel.delete().catch(() => {}), 5000);
+  }
+});
+
+// ─── ORDER NOTIFICATIONS ─────────────────────────────────────────────────────
+
+function getChannel(guild, name) {
+  return guild?.channels.cache.find(c => c.name.includes(name))?.id ?? name;
+}
 
 function buildEmbedPayload(order) {
   const fields = [
