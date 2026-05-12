@@ -147,6 +147,8 @@ tr:hover td { background: #ffffff04; }
   min-height: 90px; padding: .5rem; cursor: pointer; transition: border-color .15s;
 }
 .cal-cell:hover { border-color: var(--red); }
+.cal-cell.cal-blocked { background: #e74c3c0a; border-color: #e74c3c44; }
+.cal-cell.cal-blocked:hover { border-color: #e74c3c; }
 .cal-cell.today { border-color: var(--red); }
 .cal-cell.other-month .cal-date { color: var(--muted); }
 .cal-date { font-size: .78rem; font-weight: 600; margin-bottom: .3rem; }

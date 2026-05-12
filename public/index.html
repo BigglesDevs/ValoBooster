@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="stylesheet" href="css/styles.css" />
   <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -764,19 +765,52 @@
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <button class="modal-close" id="modalClose">&times;</button>
-      <h2>Confirm Your Order</h2>
-      <p id="modalSummary" class="modal-summary-text"></p>
-      <div class="modal-price-row">
-        <span id="modalOriginal" class="modal-original"></span>
-        <span class="modal-total-val" id="modalTotal"></span>
+
+      <!-- Step 1: Review & Schedule -->
+      <div id="modalStep1">
+        <h2>Confirm Your Order</h2>
+        <p id="modalSummary" class="modal-summary-text"></p>
+        <div class="modal-price-row">
+          <span id="modalOriginal" class="modal-original"></span>
+          <span class="modal-total-val" id="modalTotal"></span>
+        </div>
+        <div class="modal-discount-badge" id="modalDiscountBadge"></div>
+
+        <div class="modal-schedule">
+          <p class="modal-schedule-label">When would you like your boost?</p>
+          <div class="modal-schedule-row">
+            <div class="modal-schedule-field">
+              <label>Date</label>
+              <input type="date" id="bookingDate" />
+            </div>
+            <div class="modal-schedule-field">
+              <label>Time</label>
+              <input type="time" id="bookingTime" value="12:00" />
+            </div>
+          </div>
+          <p class="modal-schedule-note">Your booster will confirm or suggest an alternative time. Your card is <strong>held but not charged</strong> until a booster accepts.</p>
+        </div>
+
+        <button class="btn-primary" id="modalContinueBtn">Continue to Payment &rarr;</button>
       </div>
-      <div class="modal-discount-badge" id="modalDiscountBadge"></div>
-      <div class="modal-info">After checkout you'll receive a secure email form to submit your Valorant details. Your booster starts within 1 hour. Support available Mon–Fri 9am–6pm EST.</div>
-      <button class="btn-primary" id="modalCheckoutBtn"><iconify-icon icon="tabler:lock" style="vertical-align:middle;"></iconify-icon> Pay Securely with Stripe</button>
+
+      <!-- Step 2: Card details -->
+      <div id="modalStep2" style="display:none">
+        <h2>Secure Payment</h2>
+        <p id="modalStep2Summary" class="modal-summary-text" style="margin-bottom:.5rem"></p>
+        <p class="modal-info" style="margin-bottom:1rem">Your card is <strong>held but not charged</strong> until a booster confirms. If no booster is available, the hold is released automatically — you pay nothing.</p>
+        <div id="cardElement" class="card-element-wrap"></div>
+        <p id="cardErrors" class="card-error-msg"></p>
+        <button class="btn-primary" id="modalPayBtn" style="margin-top:1rem">
+          <iconify-icon icon="tabler:lock" style="vertical-align:middle;"></iconify-icon> Reserve &amp; Pay
+        </button>
+        <button class="btn-ghost-sm" id="modalBackBtn" style="margin-top:.6rem;width:100%">&larr; Back</button>
+      </div>
+
       <div class="checkout-badges">
         <span><iconify-icon icon="tabler:lock" style="vertical-align:middle;"></iconify-icon> SSL Secure</span>
         <span><iconify-icon icon="tabler:circle-check-filled" style="vertical-align:middle;"></iconify-icon> Stripe</span>
-        <span><iconify-icon icon="tabler:coins" style="vertical-align:middle;"></iconify-icon> Money-Back</span>
+        <span><iconify-icon icon="tabler:coins" style="vertical-align:middle;"></iconify-icon> No charge until confirmed</span>
       </div>
     </div>
   </div>

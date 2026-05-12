@@ -10,136 +10,177 @@ const db           = require('./src/db');
 const adminRouter  = require('./src/routes/admin');
 
 const app = express();
-const notifiedSessions = new Set();
 
 app.use(cookieParser());
-app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', adminRouter);
 
-// ── Helper: save a confirmed order to the database ────────────────────────────
-function saveOrder(stripeSessionId, meta, amountCents, customerEmail) {
-  try {
-    db.prepare(`
-      INSERT OR IGNORE INTO orders
-        (id, stripe_session_id, service, amount_cents, customer_email, options, addons, promo)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      uuidv4(),
-      stripeSessionId,
-      meta.service || 'Valorant Boost',
-      amountCents,
-      customerEmail || null,
-      meta.options  || null,
-      meta.addons   || null,
-      meta.promo    || null,
-    );
-  } catch (err) {
-    console.error('saveOrder error:', err.message);
-  }
+// ── Stripe helpers ────────────────────────────────────────────────────────────
+async function stripePost(endpoint, params) {
+  const res = await fetch(`https://api.stripe.com/v1${endpoint}`, {
+    method:  'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+      'Content-Type':  'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams(params).toString(),
+  });
+  return res.json();
 }
 
-// ── Checkout ──────────────────────────────────────────────────────────────────
-app.post('/create-checkout', async (req, res) => {
-  const { amountCents, email, description, reference, options, addons, promo } = req.body;
+async function capturePaymentIntent(id) {
+  return stripePost(`/payment_intents/${encodeURIComponent(id)}/capture`, {});
+}
+
+async function cancelPaymentIntent(id, reason = 'requested_by_customer') {
+  return stripePost(`/payment_intents/${encodeURIComponent(id)}/cancel`, { reason });
+}
+
+// ── Auto-expiry job (runs every hour) ─────────────────────────────────────────
+// Releases holds on orders that no booster accepted within 24 hours
+setInterval(async () => {
+  const expired = db.prepare(`
+    SELECT * FROM orders
+    WHERE status = 'pending'
+      AND payment_intent_id IS NOT NULL
+      AND created_at < unixepoch() - 86400
+  `).all();
+
+  for (const order of expired) {
+    try {
+      await cancelPaymentIntent(order.payment_intent_id, 'abandoned');
+      db.prepare("UPDATE orders SET status='expired' WHERE id=?").run(order.id);
+      if (order.customer_email) {
+        sendOrderEmail(order.customer_email, { ...order, _reason: 'expired' })
+          .catch(e => console.error('Expiry email error:', e.message));
+      }
+      console.log('Auto-expired order', order.id);
+    } catch (err) {
+      console.error('Expiry error for', order.id, err.message);
+    }
+  }
+}, 60 * 60 * 1000);
+
+// ── Public config ─────────────────────────────────────────────────────────────
+app.get('/api/stripe-key', (req, res) => {
+  const key = process.env.STRIPE_PUBLISHABLE_KEY;
+  if (!key) return res.status(500).json({ error: 'Stripe not configured' });
+  res.json({ publishableKey: key });
+});
+
+// ── Availability (public — used by customer date picker) ──────────────────────
+app.get('/api/availability', (req, res) => {
+  const { n: boosterCount } = db.prepare(
+    "SELECT COUNT(*) as n FROM users"
+  ).get();
+
+  if (boosterCount === 0) return res.json({ blocked: [] });
+
+  const blocked = db.prepare(`
+    SELECT date FROM blocked_dates
+    GROUP BY date
+    HAVING COUNT(DISTINCT booster_id) >= ?
+  `).all(boosterCount).map(r => r.date);
+
+  res.json({ blocked });
+});
+
+// ── Create Payment Intent (holds card, does NOT charge) ───────────────────────
+app.post('/create-payment-intent', express.json(), async (req, res) => {
+  const { amountCents, email, description, reference, options, addons, promo, scheduledStart } = req.body;
 
   if (!amountCents || amountCents < 100 || amountCents > 500000)
     return res.status(400).json({ error: 'Invalid amount' });
 
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey)
-    return res.status(500).json({ error: 'Stripe not configured — set STRIPE_SECRET_KEY in Railway' });
+  if (!process.env.STRIPE_SECRET_KEY)
+    return res.status(500).json({ error: 'Stripe not configured' });
 
-  const port    = process.env.PORT || 3000;
-  const siteUrl = process.env.SITE_URL
-    || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : null)
-    || `http://localhost:${port}`;
-
-  const params = new URLSearchParams();
-  params.append('payment_method_types[]',                        'card');
-  params.append('line_items[0][price_data][currency]',           'gbp');
-  params.append('line_items[0][price_data][unit_amount]',        String(amountCents));
-  params.append('line_items[0][price_data][product_data][name]', description || 'Valorant Boost');
-  params.append('line_items[0][quantity]',                       '1');
-  params.append('mode',                                          'payment');
-  params.append('success_url', `${siteUrl}/success.html?ref=${encodeURIComponent(reference || '')}&session_id={CHECKOUT_SESSION_ID}`);
-  params.append('cancel_url', siteUrl);
-  if (email)     params.append('customer_email',      email);
-  if (reference) params.append('client_reference_id', reference);
-
-  params.append('metadata[service]',      description || 'Valorant Boost');
-  params.append('metadata[amount_cents]', String(amountCents));
-  if (email)   params.append('metadata[email]',   email);
-  if (options) params.append('metadata[options]', String(options));
-  if (addons)  params.append('metadata[addons]',  typeof addons === 'string' ? addons : JSON.stringify(addons));
-  if (promo)   params.append('metadata[promo]',   typeof promo  === 'string' ? promo  : JSON.stringify(promo));
+  const params = {
+    amount:           String(amountCents),
+    currency:         'gbp',
+    capture_method:   'manual',
+    'metadata[service]':       description || 'Valorant Boost',
+    'metadata[amount_cents]':  String(amountCents),
+    'metadata[reference]':     reference || '',
+    'metadata[options]':       options   || '',
+  };
+  if (email)   params.receipt_email        = email;
+  if (addons)  params['metadata[addons]']  = typeof addons === 'string' ? addons : JSON.stringify(addons);
+  if (promo)   params['metadata[promo]']   = typeof promo  === 'string' ? promo  : JSON.stringify(promo);
+  if (scheduledStart) params['metadata[scheduled_start]'] = scheduledStart;
 
   try {
-    const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${secretKey}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString(),
-    });
-    const session = await response.json();
-    if (!response.ok) {
-      console.error('Stripe error:', session);
-      return res.status(502).json({ error: session.error?.message || 'Stripe error' });
-    }
-    res.json({ url: session.url });
+    const pi = await stripePost('/payment_intents', params);
+    if (pi.error) return res.status(502).json({ error: pi.error.message });
+    res.json({ clientSecret: pi.client_secret, paymentIntentId: pi.id });
   } catch (err) {
-    console.error('Server error:', err);
+    console.error('create-payment-intent error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// ── Verify payment (called by success page) ───────────────────────────────────
-app.post('/verify-payment', async (req, res) => {
-  const { sessionId } = req.body;
-  if (!sessionId) return res.status(400).json({ error: 'Missing sessionId' });
+// ── Confirm payment (called after Stripe.js confirms card hold) ───────────────
+app.post('/confirm-payment', express.json(), async (req, res) => {
+  const { paymentIntentId, email, description, reference, options, addons, promo, scheduledStart } = req.body;
+  if (!paymentIntentId) return res.status(400).json({ error: 'Missing paymentIntentId' });
 
-  if (notifiedSessions.has(sessionId))
-    return res.json({ ok: true, alreadyNotified: true });
+  // Check it's already in DB (idempotent)
+  const existing = db.prepare('SELECT id FROM orders WHERE payment_intent_id=?').get(paymentIntentId);
+  if (existing) return res.json({ ok: true });
 
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) return res.status(500).json({ error: 'Stripe not configured' });
-
+  // Verify status with Stripe
   try {
-    const response = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`, {
-      headers: { 'Authorization': `Bearer ${secretKey}` },
+    const piRes = await fetch(`https://api.stripe.com/v1/payment_intents/${encodeURIComponent(paymentIntentId)}`, {
+      headers: { 'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}` },
     });
-    const session = await response.json();
+    const pi = await piRes.json();
+    if (pi.status !== 'requires_capture')
+      return res.status(402).json({ error: 'Payment not authorised' });
 
-    if (!response.ok || session.payment_status !== 'paid')
-      return res.status(402).json({ error: 'Payment not confirmed' });
+    const meta        = pi.metadata || {};
+    const amountCents = pi.amount;
+    const customerEmail = pi.receipt_email || email;
+    const schedStart  = scheduledStart
+      ? Math.floor(new Date(scheduledStart).getTime() / 1000)
+      : (meta.scheduled_start ? Math.floor(new Date(meta.scheduled_start).getTime() / 1000) : null);
 
-    notifiedSessions.add(sessionId);
-
-    const meta          = session.metadata || {};
-    const amountCents   = session.amount_total ?? parseInt(meta.amount_cents, 10) ?? 0;
-    const customerEmail = session.customer_email || meta.email;
-
-    saveOrder(session.id, meta, amountCents, customerEmail);
+    db.prepare(`
+      INSERT OR IGNORE INTO orders
+        (id, payment_intent_id, service, amount_cents, customer_email, options, addons, promo, scheduled_start, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+    `).run(
+      uuidv4(), paymentIntentId,
+      description || meta.service || 'Valorant Boost',
+      amountCents,
+      customerEmail || null,
+      options || meta.options || null,
+      addons  || meta.addons  || null,
+      promo   || meta.promo   || null,
+      schedStart,
+    );
 
     const order = {
-      service: meta.service || 'Valorant Boost',
+      service: description || meta.service || 'Valorant Boost',
       total:   (amountCents / 100).toFixed(2),
       email:   customerEmail || '(not entered)',
-      options: meta.options || '—',
-      addons:  meta.addons  || null,
-      promo:   meta.promo   || null,
+      options: options || meta.options || '—',
+      addons:  addons  || meta.addons  || null,
+      promo:   promo   || meta.promo   || null,
     };
 
     bot.sendOrderNotification(order);
-    if (customerEmail) sendOrderEmail(customerEmail, order).catch(err => console.error('Email error:', err.message));
+    if (customerEmail) {
+      sendOrderEmail(customerEmail, order).catch(e => console.error('Email error:', e.message));
+    }
 
     res.json({ ok: true });
   } catch (err) {
-    console.error('verify-payment error:', err);
+    console.error('confirm-payment error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// ── Stripe webhook (raw body required for signature verification) ──────────────
+// ── Stripe webhook ────────────────────────────────────────────────────────────
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const sig           = req.headers['stripe-signature'];
@@ -160,22 +201,14 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     return res.status(400).json({ error: 'Bad request' });
   }
 
-  if (event.type === 'checkout.session.completed') {
-    const session     = event.data.object;
-    const meta        = session.metadata || {};
-    const amountCents = session.amount_total ?? parseInt(meta.amount_cents, 10) ?? 0;
-    const customerEmail = session.customer_email || meta.email;
+  if (event.type === 'payment_intent.payment_failed') {
+    const pi = event.data.object;
+    db.prepare("UPDATE orders SET status='failed' WHERE payment_intent_id=?").run(pi.id);
+  }
 
-    saveOrder(session.id, meta, amountCents, customerEmail);
-
-    bot.sendOrderNotification({
-      service: meta.service || 'Valorant Boost',
-      total:   (amountCents / 100).toFixed(2),
-      email:   customerEmail || '(not entered)',
-      options: meta.options || '—',
-      addons:  meta.addons  || null,
-      promo:   meta.promo   || null,
-    });
+  if (event.type === 'payment_intent.canceled') {
+    const pi = event.data.object;
+    db.prepare("UPDATE orders SET status='expired' WHERE payment_intent_id=? AND status='pending'").run(pi.id);
   }
 
   res.json({ received: true });

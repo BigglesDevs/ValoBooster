@@ -95,14 +95,16 @@ function renderOrders() {
       : '<span style="color:var(--muted)">Not set</span>';
 
     const canAccept   = o.status === 'pending';
-    const canSchedule = (o.status === 'accepted' || o.status === 'pending') && (me.role === 'admin' || o.booster_id === me.id);
+    const canDecline  = ['pending','accepted'].includes(o.status) && (me.role === 'admin' || o.booster_id === me.id);
+    const canSchedule = (o.status === 'accepted') && (me.role === 'admin' || o.booster_id === me.id);
     const canComplete = o.status === 'accepted' && (me.role === 'admin' || o.booster_id === me.id);
+    const badgeClass  = { pending:'badge-pending', accepted:'badge-accepted', completed:'badge-completed', declined:'badge-pending', expired:'badge-pending' }[o.status] || 'badge-pending';
 
     return `<tr>
       <td><strong>${esc(o.service)}</strong></td>
       <td style="font-size:.8rem">${esc(o.customer_email || '—')}</td>
       <td>£${((o.amount_cents || 0) / 100).toFixed(2)}</td>
-      <td><span class="badge badge-${o.status}">${o.status}</span></td>
+      <td><span class="badge ${badgeClass}">${o.status}</span></td>
       <td style="font-size:.8rem;color:var(--muted)">${esc(o.booster_name || '—')}</td>
       <td style="font-size:.8rem">${scheduled}</td>
       <td>
@@ -110,6 +112,7 @@ function renderOrders() {
           ${canAccept   ? `<button class="btn btn-primary btn-sm" onclick="acceptOrder('${o.id}')">Accept</button>` : ''}
           ${canSchedule ? `<button class="btn btn-ghost btn-sm" onclick="openSchedule('${o.id}')">Schedule</button>` : ''}
           ${canComplete ? `<button class="btn btn-success btn-sm" onclick="completeOrder('${o.id}')">Complete</button>` : ''}
+          ${canDecline  ? `<button class="btn btn-danger btn-sm" onclick="declineOrder('${o.id}')">Decline</button>` : ''}
         </div>
       </td>
     </tr>`;
@@ -120,6 +123,13 @@ document.getElementById('statusFilter').addEventListener('change', renderOrders)
 
 async function acceptOrder(id) {
   const res = await fetch(`/admin/api/orders/${id}/accept`, { method: 'POST' });
+  if (!res.ok) { const d = await res.json(); return alert(d.error); }
+  await loadOrders();
+}
+
+async function declineOrder(id) {
+  if (!confirm('Decline this order? The customer\'s card hold will be released immediately.')) return;
+  const res = await fetch(`/admin/api/orders/${id}/decline`, { method: 'POST' });
   if (!res.ok) { const d = await res.json(); return alert(d.error); }
   await loadOrders();
 }
@@ -172,9 +182,16 @@ async function saveSchedule() {
 }
 
 // ── Calendar ──────────────────────────────────────────────────────────────────
+let myBlockedDates = [];
+
 async function renderCalendar() {
-  const res   = await fetch('/admin/api/calendar');
-  const events = await res.json();
+  const [evRes, blRes] = await Promise.all([
+    fetch('/admin/api/calendar'),
+    fetch('/admin/api/blocked-dates'),
+  ]);
+  const events      = await evRes.json();
+  const blockedRows = await blRes.json();
+  myBlockedDates = blockedRows.filter(b => b.booster_id === me.id).map(b => b.date);
 
   const year  = calDate.getFullYear();
   const month = calDate.getMonth();
@@ -221,8 +238,12 @@ async function renderCalendar() {
     const more = dayEvents.length > 3
       ? `<div style="font-size:.65rem;color:var(--muted)">+${dayEvents.length - 3} more</div>` : '';
 
-    html += `<div class="cal-cell${isToday ? ' today' : ''}${!isValid ? ' other-month' : ''}">
-      <div class="cal-date">${isValid ? dayNum : ''}</div>
+    const dateStr  = isValid ? `${year}-${String(month+1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}` : '';
+    const isBlocked = dateStr && myBlockedDates.includes(dateStr);
+
+    html += `<div class="cal-cell${isToday ? ' today' : ''}${!isValid ? ' other-month' : ''}${isBlocked ? ' cal-blocked' : ''}"
+      ${isValid ? `onclick="toggleBlock('${dateStr}')" title="${isBlocked ? 'Click to unblock' : 'Click to block this day'}"` : ''}>
+      <div class="cal-date">${isValid ? dayNum : ''}${isBlocked ? ' <span style="color:#e74c3c;font-size:.65rem">✕</span>' : ''}</div>
       ${evHtml}${more}
     </div>`;
   }
@@ -308,8 +329,22 @@ function toLocalInput(ms) {
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+async function toggleBlock(date) {
+  if (myBlockedDates.includes(date)) {
+    await fetch(`/admin/api/blocked-dates/${encodeURIComponent(date)}`, { method: 'DELETE' });
+  } else {
+    await fetch('/admin/api/blocked-dates', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date }),
+    });
+  }
+  renderCalendar();
+}
+
 // expose for inline onclick handlers
 window.acceptOrder   = acceptOrder;
+window.declineOrder  = declineOrder;
 window.completeOrder = completeOrder;
 window.openSchedule  = openSchedule;
 window.removeBooster = removeBooster;
+window.toggleBlock   = toggleBlock;

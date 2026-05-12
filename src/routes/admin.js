@@ -113,6 +113,58 @@ router.post('/api/orders/:id/complete', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+router.post('/api/orders/:id/decline', requireAuth, async (req, res) => {
+  const order = db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (!['pending','accepted'].includes(order.status))
+    return res.status(400).json({ error: 'Order cannot be declined in its current state' });
+  if (req.user.role !== 'admin' && order.booster_id !== req.user.id)
+    return res.status(403).json({ error: 'Forbidden' });
+
+  if (order.payment_intent_id) {
+    try {
+      await fetch(`https://api.stripe.com/v1/payment_intents/${encodeURIComponent(order.payment_intent_id)}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+          'Content-Type':  'application/x-www-form-urlencoded',
+        },
+        body: 'reason=requested_by_customer',
+      });
+    } catch (err) {
+      console.error('Stripe cancel error:', err.message);
+    }
+  }
+
+  db.prepare("UPDATE orders SET status='declined', booster_id=NULL WHERE id=?").run(order.id);
+  res.json({ ok: true });
+});
+
+// ── Blocked dates ─────────────────────────────────────────────────────────────
+router.get('/api/blocked-dates', requireAuth, (req, res) => {
+  const rows = req.user.role === 'admin'
+    ? db.prepare('SELECT bd.*, u.display_name FROM blocked_dates bd JOIN users u ON bd.booster_id=u.id').all()
+    : db.prepare('SELECT * FROM blocked_dates WHERE booster_id=?').all(req.user.id);
+  res.json(rows);
+});
+
+router.post('/api/blocked-dates', requireAuth, express.json(), (req, res) => {
+  const { date } = req.body || {};
+  if (!date) return res.status(400).json({ error: 'Date required (YYYY-MM-DD)' });
+  try {
+    db.prepare('INSERT OR IGNORE INTO blocked_dates (id,booster_id,date) VALUES (?,?,?)')
+      .run(uuidv4(), req.user.id, date);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.delete('/api/blocked-dates/:date', requireAuth, (req, res) => {
+  db.prepare('DELETE FROM blocked_dates WHERE booster_id=? AND date=?').run(req.user.id, req.params.date);
+  res.json({ ok: true });
+});
+
 // ── Boosters (admin only) ─────────────────────────────────────────────────────
 router.get('/api/boosters', requireAuth, requireAdmin, (req, res) => {
   res.json(db.prepare(

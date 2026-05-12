@@ -441,29 +441,51 @@ document.querySelectorAll('.buy-btn').forEach(btn => {
 });
 
 // ============================================================
-// MODAL
+// MODAL & STRIPE ELEMENTS
 // ============================================================
-const modalOverlay  = document.getElementById('modalOverlay');
-const modalClose    = document.getElementById('modalClose');
-const modalSummary  = document.getElementById('modalSummary');
-const modalOriginal = document.getElementById('modalOriginal');
-const modalTotalEl  = document.getElementById('modalTotal');
-const modalDiscount = document.getElementById('modalDiscountBadge');
-const modalCheckout = document.getElementById('modalCheckoutBtn');
+const modalOverlay = document.getElementById('modalOverlay');
+const modalClose   = document.getElementById('modalClose');
+const modalSummary = document.getElementById('modalSummary');
+const modalOriginal= document.getElementById('modalOriginal');
+const modalTotalEl = document.getElementById('modalTotal');
+const modalDiscount= document.getElementById('modalDiscountBadge');
+const step1        = document.getElementById('modalStep1');
+const step2        = document.getElementById('modalStep2');
+
+let stripe = null, cardElement = null;
+let currentOrderMeta = {};
+let blockedDates = [];
+
+async function initStripe() {
+  try {
+    const [keyRes, availRes] = await Promise.all([
+      fetch('/api/stripe-key'),
+      fetch('/api/availability'),
+    ]);
+    const { publishableKey } = await keyRes.json();
+    const { blocked }        = await availRes.json();
+    blockedDates = blocked || [];
+    stripe = Stripe(publishableKey);
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('bookingDate').min = today;
+  } catch (e) { console.warn('Stripe init:', e.message); }
+}
+initStripe();
 
 function openModal(total, label) {
   const svcType  = serviceTypeSel.value;
   const base     = svcType === 'rank' ? rankBasePrice : (FIXED_PRICES[svcType] || 0);
   const platMult = PLATFORM_MULT[platformSel ? platformSel.value : 'pc'] || 1;
   const regMult  = REGION_MULT[regionSel ? regionSel.value : 'na'] || 1;
-  const afterOptions = base * platMult * regMult;
+  const afterOptions   = base * platMult * regMult;
   const { lines: addonLines } = getAddonTotal(afterOptions);
-  const addonTotal = addonLines.reduce((s, a) => s + a.amt, 0);
-  const beforeDiscount = afterOptions + addonTotal;
+  const beforeDiscount = afterOptions + addonLines.reduce((s, a) => s + a.amt, 0);
 
   const platText = platformSel ? ` | ${platformSel.value.toUpperCase()}` : '';
-  const regText  = regionSel ? ` | ${REGION_LABEL[regionSel.value]}` : '';
-  modalSummary.textContent = label + ' — Duo Queue' + platText + regText;
+  const regText  = regionSel   ? ` | ${REGION_LABEL[regionSel.value]}`   : '';
+  const summaryText = label + ' — Duo Queue' + platText + regText;
+  modalSummary.textContent = summaryText;
+  document.getElementById('modalStep2Summary').textContent = summaryText;
 
   if (activeDiscount > 0 && beforeDiscount !== total) {
     modalOriginal.textContent = '£' + beforeDiscount.toFixed(2);
@@ -472,9 +494,28 @@ function openModal(total, label) {
     modalOriginal.textContent = '';
     modalDiscount.textContent = '';
   }
+  modalTotalEl.textContent = '£' + total.toFixed(2);
 
-  modalTotalEl.textContent  = '£' + total.toFixed(2);
-  modalCheckout.dataset.svc = svcType;
+  const platName   = platformSel?.selectedOptions[0]?.text || '';
+  const regName    = regionSel?.selectedOptions[0]?.text   || '';
+  const addonNames = ADDON_IDS
+    .filter(id => document.getElementById(id)?.checked)
+    .map(id => ADDON_LABEL[id]).join(', ') || null;
+
+  currentOrderMeta = {
+    svcType,
+    amountCents: Math.round(total * 100),
+    email:       document.getElementById('email').value.trim(),
+    description: svcType === 'rank'
+      ? `Rank Boost: ${fromRankSel.value} → ${toRankSel.value}`
+      : serviceTypeSel.selectedOptions[0].text.split(' — ')[0],
+    reference: svcType === 'rank' ? `${fromRankSel.value}_to_${toRankSel.value}` : svcType,
+    options:   `Duo Queue | ${platName} | ${regName}`,
+    addons:    addonNames,
+    promo:     activeCode || null,
+  };
+
+  showStep(1);
   modalOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -482,102 +523,113 @@ function openModal(total, label) {
 function closeModal() {
   modalOverlay.classList.remove('open');
   document.body.style.overflow = '';
+  showStep(1);
+  if (cardElement) cardElement.clear();
+  document.getElementById('cardErrors').textContent = '';
+}
+
+function showStep(n) {
+  step1.style.display = n === 1 ? '' : 'none';
+  step2.style.display = n === 2 ? '' : 'none';
 }
 
 modalClose.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+document.getElementById('modalBackBtn').addEventListener('click', () => showStep(1));
+
+document.getElementById('modalContinueBtn').addEventListener('click', async () => {
+  const dateVal = document.getElementById('bookingDate').value;
+  const timeVal = document.getElementById('bookingTime').value || '12:00';
+  if (!dateVal) { alert('Please select a preferred date.'); return; }
+  if (blockedDates.includes(dateVal)) { alert('That date is fully booked. Please choose another date.'); return; }
+
+  const btn = document.getElementById('modalContinueBtn');
+  btn.disabled = true;
+  btn.textContent = 'Setting up payment…';
+
+  try {
+    const scheduledStart = `${dateVal}T${timeVal}`;
+    const res  = await fetch('/create-payment-intent', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...currentOrderMeta, scheduledStart }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to create payment');
+
+    currentOrderMeta.scheduledStart = scheduledStart;
+    currentOrderMeta.clientSecret   = data.clientSecret;
+
+    if (!cardElement) {
+      const elements = stripe.elements();
+      cardElement = elements.create('card', {
+        style: {
+          base: { color: '#e2e2e2', fontFamily: '"Segoe UI", system-ui, sans-serif', fontSize: '15px', '::placeholder': { color: '#555' } },
+          invalid: { color: '#e74c3c' },
+        },
+      });
+      cardElement.mount('#cardElement');
+      cardElement.on('change', ev => {
+        document.getElementById('cardErrors').textContent = ev.error ? ev.error.message : '';
+      });
+    }
+    showStep(2);
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Continue to Payment →';
+  }
+});
+
+document.getElementById('modalPayBtn').addEventListener('click', async () => {
+  if (!stripe || !cardElement) return;
+  const btn = document.getElementById('modalPayBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<iconify-icon icon="tabler:lock" style="vertical-align:middle"></iconify-icon> Processing…';
+
+  const { paymentIntent, error } = await stripe.confirmCardPayment(currentOrderMeta.clientSecret, {
+    payment_method: { card: cardElement, billing_details: { email: currentOrderMeta.email } },
+  });
+
+  if (error) {
+    document.getElementById('cardErrors').textContent = error.message;
+    btn.disabled = false;
+    btn.innerHTML = '<iconify-icon icon="tabler:lock" style="vertical-align:middle"></iconify-icon> Reserve &amp; Pay';
+    return;
+  }
+
+  try {
+    await fetch('/confirm-payment', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentIntentId: paymentIntent.id, ...currentOrderMeta }),
+    });
+  } catch (e) { console.warn('confirm-payment:', e.message); }
+
+  closeModal();
+  window.location.href = `/success.html?ref=${encodeURIComponent(currentOrderMeta.reference || '')}`;
+});
 
 // ============================================================
 // FORM SUBMIT
 // ============================================================
 document.getElementById('orderForm').addEventListener('submit', e => {
   e.preventDefault();
-
   const svcType = serviceTypeSel.value;
   const name    = document.getElementById('name').value.trim();
   const email   = document.getElementById('email').value.trim();
 
   if (svcType === 'rank') {
-    if (!fromRankSel.value || !toRankSel.value) {
-      alert('Please select both your current rank and desired rank.'); return;
-    }
-    if (rankBasePrice === 0) {
-      alert('Your desired rank must be higher than your current rank.'); return;
-    }
+    if (!fromRankSel.value || !toRankSel.value) { alert('Please select both your current rank and desired rank.'); return; }
+    if (rankBasePrice === 0) { alert('Your desired rank must be higher than your current rank.'); return; }
   }
   if (!name || !email) { alert('Please fill in your name and email.'); return; }
-
   const total = updateOrderTotal();
   if (total === 0) { alert('Please select a service.'); return; }
 
-  let label;
-  if (svcType === 'rank') {
-    label = `${fromRankSel.value} → ${toRankSel.value} Rank Boost`;
-  } else {
-    label = serviceTypeSel.selectedOptions[0].text.split(' — ')[0];
-  }
-
+  const label = svcType === 'rank'
+    ? `${fromRankSel.value} → ${toRankSel.value} Rank Boost`
+    : serviceTypeSel.selectedOptions[0].text.split(' — ')[0];
   openModal(total, label);
-});
-
-// ============================================================
-// STRIPE CHECKOUT
-// ============================================================
-modalCheckout.addEventListener('click', async () => {
-  const svc         = modalCheckout.dataset.svc;
-  const email       = document.getElementById('email').value.trim();
-  const totalText   = document.getElementById('totalDisplay').textContent;
-  const total       = parseFloat(totalText.replace('£', ''));
-  const amountCents = Math.round(total * 100);
-
-  if (!amountCents || amountCents < 100) {
-    alert('Please select your ranks and complete the order form first.');
-    return;
-  }
-
-  const platName   = platformSel?.selectedOptions[0]?.text || '';
-  const regName    = regionSel?.selectedOptions[0]?.text || '';
-  const addonNames = ADDON_IDS
-    .filter(id => document.getElementById(id)?.checked)
-    .map(id => ADDON_LABEL[id])
-    .join(', ') || null;
-
-  const serviceDesc = svc === 'rank'
-    ? `Rank Boost: ${fromRankSel?.selectedOptions[0]?.text} → ${toRankSel?.selectedOptions[0]?.text}`
-    : serviceTypeSel?.selectedOptions[0]?.text?.split(' — ')[0] || svc;
-
-  const reference = svc === 'rank'
-    ? `${fromRankSel.value}_to_${toRankSel.value}`
-    : svc;
-
-  modalCheckout.disabled = true;
-  modalCheckout.textContent = 'Redirecting to payment…';
-
-  try {
-    const res = await fetch('/create-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amountCents,
-        email,
-        description: serviceDesc,
-        reference,
-        options: `Duo Queue | ${platName} | ${regName}`,
-        addons:  addonNames,
-        promo:   activeCode || null,
-      }),
-    });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error(data.error || 'Checkout failed');
-    }
-  } catch (err) {
-    alert('Something went wrong: ' + err.message + '\n\nPlease try again or contact support.');
-    modalCheckout.disabled = false;
-    modalCheckout.textContent = 'Proceed to Payment →';
-  }
 });
 
 // ============================================================
