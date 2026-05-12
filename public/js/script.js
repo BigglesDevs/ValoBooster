@@ -575,6 +575,7 @@ document.getElementById('modalContinueBtn').addEventListener('click', async () =
     if (!cardElement) {
       const elements = stripe.elements();
       cardElement = elements.create('card', {
+        hidePostalCode: true,
         style: {
           base: { color: '#e2e2e2', fontFamily: '"Segoe UI", system-ui, sans-serif', fontSize: '15px', '::placeholder': { color: '#555' } },
           invalid: { color: '#e74c3c' },
@@ -611,15 +612,18 @@ document.getElementById('modalPayBtn').addEventListener('click', async () => {
     return;
   }
 
+  let orderId = null;
   try {
-    await fetch('/confirm-payment', {
+    const cfRes = await fetch('/confirm-payment', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ paymentIntentId: paymentIntent.id, ...currentOrderMeta }),
     });
+    const cfData = await cfRes.json();
+    orderId = cfData.orderId || null;
   } catch (e) { console.warn('confirm-payment:', e.message); }
 
   closeModal();
-  window.location.href = `/success.html?ref=${encodeURIComponent(currentOrderMeta.reference || '')}`;
+  window.location.href = `/portal.html?order=${encodeURIComponent(orderId || '')}`;
 });
 
 // ============================================================

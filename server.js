@@ -126,7 +126,7 @@ app.post('/confirm-payment', express.json(), async (req, res) => {
 
   // Check it's already in DB (idempotent)
   const existing = db.prepare('SELECT id FROM orders WHERE payment_intent_id=?').get(paymentIntentId);
-  if (existing) return res.json({ ok: true });
+  if (existing) return res.json({ ok: true, orderId: existing.id });
 
   // Verify status with Stripe
   try {
@@ -144,12 +144,13 @@ app.post('/confirm-payment', express.json(), async (req, res) => {
       ? Math.floor(new Date(scheduledStart).getTime() / 1000)
       : (meta.scheduled_start ? Math.floor(new Date(meta.scheduled_start).getTime() / 1000) : null);
 
+    const orderId = uuidv4();
     db.prepare(`
       INSERT OR IGNORE INTO orders
         (id, payment_intent_id, service, amount_cents, customer_email, options, addons, promo, scheduled_start, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
     `).run(
-      uuidv4(), paymentIntentId,
+      orderId, paymentIntentId,
       description || meta.service || 'Valorant Boost',
       amountCents,
       customerEmail || null,
@@ -169,15 +170,23 @@ app.post('/confirm-payment', express.json(), async (req, res) => {
     };
 
     bot.sendOrderNotification(order);
-    if (customerEmail) {
-      sendOrderEmail(customerEmail, order).catch(e => console.error('Email error:', e.message));
-    }
 
-    res.json({ ok: true });
+    res.json({ ok: true, orderId });
   } catch (err) {
     console.error('confirm-payment error:', err);
     res.status(500).json({ error: 'Server error' });
   }
+});
+
+// ── Customer portal — public order lookup ─────────────────────────────────────
+app.get('/api/portal/:orderId', (req, res) => {
+  const order = db.prepare(`
+    SELECT id, service, amount_cents, status, options, addons,
+           scheduled_start, scheduled_end, created_at
+    FROM orders WHERE id=?
+  `).get(req.params.orderId);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  res.json(order);
 });
 
 // ── Stripe webhook ────────────────────────────────────────────────────────────

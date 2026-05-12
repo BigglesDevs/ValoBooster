@@ -3,6 +3,18 @@ const bcrypt   = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const db       = require('../db');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { sendOrderEmail } = require('../utils/mailer');
+
+async function stripeAction(path) {
+  const res = await fetch(`https://api.stripe.com/v1${path}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+      'Content-Type':  'application/x-www-form-urlencoded',
+    },
+  });
+  return res.json();
+}
 
 const router = express.Router();
 const SESSION_DAYS = 7;
@@ -81,10 +93,23 @@ router.get('/api/orders', requireAuth, (req, res) => {
   res.json(rows);
 });
 
-router.post('/api/orders/:id/accept', requireAuth, (req, res) => {
+router.post('/api/orders/:id/accept', requireAuth, async (req, res) => {
   const order = db.prepare("SELECT * FROM orders WHERE id=? AND status='pending'").get(req.params.id);
   if (!order) return res.status(404).json({ error: 'Order not found or already accepted' });
+
+  if (order.payment_intent_id) {
+    try {
+      await stripeAction(`/payment_intents/${encodeURIComponent(order.payment_intent_id)}/capture`);
+    } catch (err) {
+      console.error('Stripe capture error:', err.message);
+    }
+  }
+
   db.prepare("UPDATE orders SET status='accepted', booster_id=? WHERE id=?").run(req.user.id, order.id);
+  if (order.customer_email) {
+    sendOrderEmail(order.customer_email, { ...order, _status: 'accepted' })
+      .catch(e => console.error('Accept email error:', e.message));
+  }
   res.json({ ok: true });
 });
 
@@ -110,6 +135,10 @@ router.post('/api/orders/:id/complete', requireAuth, (req, res) => {
   if (req.user.role !== 'admin' && order.booster_id !== req.user.id)
     return res.status(403).json({ error: 'Forbidden' });
   db.prepare("UPDATE orders SET status='completed' WHERE id=?").run(order.id);
+  if (order.customer_email) {
+    sendOrderEmail(order.customer_email, { ...order, _status: 'completed' })
+      .catch(e => console.error('Complete email error:', e.message));
+  }
   res.json({ ok: true });
 });
 
@@ -137,6 +166,10 @@ router.post('/api/orders/:id/decline', requireAuth, async (req, res) => {
   }
 
   db.prepare("UPDATE orders SET status='declined', booster_id=NULL WHERE id=?").run(order.id);
+  if (order.customer_email) {
+    sendOrderEmail(order.customer_email, { ...order, _status: 'declined' })
+      .catch(e => console.error('Decline email error:', e.message));
+  }
   res.json({ ok: true });
 });
 
