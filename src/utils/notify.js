@@ -24,10 +24,12 @@ async function sendViaWebhook(order) {
 }
 
 async function sendOrderNotification(order) {
-  await Promise.allSettled([
-    sendViaBot(order).catch(err => console.error('Bot notify error:', err.message)),
-    sendViaWebhook(order).catch(err => console.error('Webhook notify error:', err.message)),
-  ]);
+  try {
+    await sendViaBot(order);
+  } catch (err) {
+    console.error('Bot notify failed, falling back to webhook:', err.message);
+    await sendViaWebhook(order).catch(e => console.error('Webhook notify error:', e.message));
+  }
 }
 
 module.exports = { sendOrderNotification };
