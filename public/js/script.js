@@ -91,33 +91,32 @@ const RANKS = [
 ];
 
 // Cost to go from RANKS[i] to RANKS[i+1] — 24 steps
-// Calibrated so Iron I → Gold II ≈ £90, matching market leaders
 const DIV_PRICE = [
-  6.49, 6.49,  // Iron I→II, II→III
-  6.49,        // Iron III→Bronze I
-  7.99, 7.99,  // Bronze I→II, II→III
-  7.99,        // Bronze III→Silver I
-  10.99, 10.99,// Silver I→II, II→III
-  10.99,       // Silver III→Gold I
-  13.99, 13.99,// Gold I→II, II→III
-  13.99,       // Gold III→Platinum I
-  19.99, 19.99,// Platinum I→II, II→III
-  19.99,       // Platinum III→Diamond I
-  27.99, 27.99,// Diamond I→II, II→III
-  27.99,       // Diamond III→Ascendant I
-  39.99, 39.99,// Ascendant I→II, II→III
-  39.99,       // Ascendant III→Immortal I
-  54.99, 54.99,// Immortal I→II, II→III
-  129.99,      // Immortal III→Radiant
+   6.99,  6.99,  // Iron I→II, II→III
+   6.99,         // Iron III→Bronze I
+   8.99,  8.99,  // Bronze I→II, II→III
+   8.99,         // Bronze III→Silver I
+  11.99, 11.99,  // Silver I→II, II→III
+  11.99,         // Silver III→Gold I
+  14.99, 14.99,  // Gold I→II, II→III
+  14.99,         // Gold III→Platinum I
+  19.99, 19.99,  // Platinum I→II, II→III
+  19.99,         // Platinum III→Diamond I
+  27.99, 27.99,  // Diamond I→II, II→III
+  27.99,         // Diamond III→Ascendant I
+  39.99, 39.99,  // Ascendant I→II, II→III
+  39.99,         // Ascendant III→Immortal I
+  59.99, 59.99,  // Immortal I→II, II→III
+  149.99,        // Immortal III→Radiant
 ];
 
 // Fixed prices for non-rank services
 const FIXED_PRICES = {
-  'wins-5':   24.99,
-  'wins-10':  44.99,
-  'wins-20':  79.99,
-  'place-5':  29.99,
-  'place-10': 54.99,
+  'wins-5':   14.99,
+  'wins-10':  24.99,
+  'wins-20':  44.99,
+  'place-5':  17.99,
+  'place-10': 32.99,
 };
 
 

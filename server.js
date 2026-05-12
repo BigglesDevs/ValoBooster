@@ -179,12 +179,17 @@ app.post('/confirm-payment', express.json(), async (req, res) => {
 });
 
 // ── Customer portal — public order lookup ─────────────────────────────────────
+const PORTAL_FIELDS = 'id, service, amount_cents, status, options, addons, scheduled_start, scheduled_end, created_at';
+
+app.get('/api/portal/by-email', (req, res) => {
+  const email = (req.query.email || '').toLowerCase().trim();
+  if (!email) return res.status(400).json({ error: 'Email required' });
+  const orders = db.prepare(`SELECT ${PORTAL_FIELDS} FROM orders WHERE customer_email=? ORDER BY created_at DESC`).all(email);
+  res.json(orders);
+});
+
 app.get('/api/portal/:orderId', (req, res) => {
-  const order = db.prepare(`
-    SELECT id, service, amount_cents, status, options, addons,
-           scheduled_start, scheduled_end, created_at
-    FROM orders WHERE id=?
-  `).get(req.params.orderId);
+  const order = db.prepare(`SELECT ${PORTAL_FIELDS} FROM orders WHERE id=?`).get(req.params.orderId);
   if (!order) return res.status(404).json({ error: 'Order not found' });
   res.json(order);
 });

@@ -30,20 +30,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem 1rem;
+      padding: 2rem 1rem 4rem;
     }
 
-    .logo {
-      margin-bottom: 2.5rem;
-      text-align: center;
-    }
-    .logo a {
-      text-decoration: none;
-      color: var(--text);
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: -.02em;
-    }
+    .logo { margin-bottom: 2.5rem; text-align: center; }
+    .logo a { text-decoration: none; color: var(--text); font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; }
     .logo a span { color: var(--red); }
     .logo p { font-size: .8rem; color: var(--muted); margin-top: .3rem; }
 
@@ -52,23 +43,20 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       width: 100%;
-      max-width: 480px;
+      max-width: 520px;
       overflow: hidden;
     }
 
-    .card-head {
-      padding: 1.4rem 1.6rem;
-      border-bottom: 1px solid var(--border);
-    }
+    .card-head { padding: 1.4rem 1.6rem; border-bottom: 1px solid var(--border); }
     .card-head h1 { font-size: 1.1rem; font-weight: 700; }
-    .card-head p  { font-size: .82rem; color: var(--muted); margin-top: .3rem; }
+    .card-head p  { font-size: .82rem; color: var(--muted); margin-top: .3rem; line-height: 1.5; }
 
     .card-body { padding: 1.6rem; }
 
-    /* Search form */
+    /* Search */
     #searchForm { display: flex; gap: .6rem; }
-    #orderIdInput {
-      flex: 1;
+    #searchInput {
+      flex: 1; min-width: 0;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -76,113 +64,96 @@
       color: var(--text);
       font-size: .9rem;
       outline: none;
-      font-family: monospace;
-      letter-spacing: .03em;
       transition: border-color .2s;
     }
-    #orderIdInput:focus { border-color: var(--red); }
+    #searchInput:focus { border-color: var(--red); }
     #searchBtn {
-      background: var(--red);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: .7rem 1.2rem;
-      font-size: .9rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: opacity .2s;
+      background: var(--red); color: #fff; border: none;
+      border-radius: 8px; padding: .7rem 1.2rem;
+      font-size: .9rem; font-weight: 600; cursor: pointer;
+      white-space: nowrap; transition: opacity .2s; flex-shrink: 0;
     }
     #searchBtn:hover { opacity: .85; }
     #searchBtn:disabled { opacity: .5; cursor: not-allowed; }
 
-    .err-msg {
-      color: #e74c3c;
-      font-size: .82rem;
-      margin-top: .7rem;
-      text-align: center;
-    }
+    .hint { font-size: .78rem; color: var(--muted); margin-top: .6rem; text-align: center; }
+    .err-msg { color: #e74c3c; font-size: .82rem; margin-top: .7rem; text-align: center; min-height: 1.1em; }
 
-    /* Order detail */
-    #orderDetail { display: none; }
-
+    /* Status banner */
     .status-banner {
-      border-radius: 10px;
-      padding: 1.2rem 1.4rem;
-      margin-bottom: 1.4rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+      border-radius: 10px; padding: 1.1rem 1.3rem; margin-bottom: 1.3rem;
+      display: flex; align-items: center; gap: .9rem;
     }
-    .status-icon { font-size: 2rem; line-height: 1; }
-    .status-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; opacity: .8; }
-    .status-title { font-size: 1.1rem; font-weight: 700; margin-top: .1rem; }
-    .status-sub   { font-size: .82rem; opacity: .75; margin-top: .25rem; line-height: 1.4; }
+    .status-icon  { font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
+    .status-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; opacity: .8; }
+    .status-title { font-size: 1rem; font-weight: 700; margin-top: .1rem; }
+    .status-sub   { font-size: .8rem; opacity: .75; margin-top: .2rem; line-height: 1.4; }
 
-    .status-pending  { background: #f1c40f15; border: 1px solid #f1c40f33; color: var(--yellow); }
-    .status-accepted { background: #3498db15; border: 1px solid #3498db33; color: var(--blue); }
-    .status-completed{ background: #2ecc7115; border: 1px solid #2ecc7133; color: var(--green); }
-    .status-declined { background: #e74c3c15; border: 1px solid #e74c3c33; color: #e74c3c; }
-    .status-expired  { background: #e67e2215; border: 1px solid #e67e2233; color: var(--orange); }
+    .status-pending  { background:#f1c40f15; border:1px solid #f1c40f33; color:var(--yellow); }
+    .status-accepted { background:#3498db15; border:1px solid #3498db33; color:var(--blue); }
+    .status-completed{ background:#2ecc7115; border:1px solid #2ecc7133; color:var(--green); }
+    .status-declined { background:#e74c3c15; border:1px solid #e74c3c33; color:#e74c3c; }
+    .status-expired  { background:#e67e2215; border:1px solid #e67e2233; color:var(--orange); }
 
     .detail-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding: .7rem 0;
-      border-bottom: 1px solid var(--border);
-      font-size: .88rem;
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: .65rem 0; border-bottom: 1px solid var(--border); font-size: .88rem;
     }
     .detail-row:last-child { border-bottom: none; }
-    .detail-label { color: var(--muted); }
-    .detail-value { font-weight: 600; text-align: right; max-width: 60%; }
+    .detail-label { color: var(--muted); flex-shrink: 0; }
+    .detail-value { font-weight: 600; text-align: right; max-width: 65%; }
 
-    .order-id-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: .8rem 1rem;
-      margin-top: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: .5rem;
+    .oid-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: .75rem 1rem; margin-top: 1.1rem;
+      display: flex; align-items: center; justify-content: space-between; gap: .5rem;
     }
-    .order-id-box .oid-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-    .order-id-box .oid-val   { font-family: monospace; font-size: .82rem; color: var(--text); word-break: break-all; }
+    .oid-label { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .oid-val   { font-family: monospace; font-size: .78rem; color: var(--text); word-break: break-all; margin-top: .15rem; }
     .copy-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--muted);
-      padding: .3rem .6rem;
-      font-size: .75rem;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all .15s;
-      flex-shrink: 0;
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      color: var(--muted); padding: .3rem .6rem; font-size: .75rem;
+      cursor: pointer; white-space: nowrap; transition: all .15s; flex-shrink: 0;
     }
     .copy-btn:hover { border-color: var(--red); color: var(--red); }
 
-    .back-link {
-      display: block;
-      margin-top: 1.4rem;
-      text-align: center;
-      font-size: .82rem;
-      color: var(--muted);
-      cursor: pointer;
-      background: none;
-      border: none;
-      text-decoration: underline;
+    .back-btn {
+      display: block; width: 100%; margin-top: 1.2rem;
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); padding: .6rem; font-size: .82rem;
+      cursor: pointer; transition: all .15s; text-align: center;
     }
-    .back-link:hover { color: var(--text); }
+    .back-btn:hover { border-color: var(--red); color: var(--red); }
 
-    footer {
-      margin-top: 3rem;
-      font-size: .75rem;
-      color: var(--muted);
-      text-align: center;
+    /* Multi-order list (email lookup) */
+    .orders-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .8rem; }
+    .order-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .85rem 1rem; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; margin-bottom: .5rem; cursor: pointer; gap: .8rem;
+      transition: border-color .15s;
     }
+    .order-row:hover { border-color: var(--red); }
+    .order-row-left  { flex: 1; min-width: 0; }
+    .order-row-svc   { font-size: .88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .order-row-date  { font-size: .75rem; color: var(--muted); margin-top: .15rem; }
+    .order-row-right { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+    .order-row-price { font-size: .88rem; font-weight: 600; }
+
+    .badge {
+      display: inline-block; padding: .18rem .55rem; border-radius: 20px;
+      font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .badge-pending  { background:#f1c40f22; color:var(--yellow);  border:1px solid #f1c40f44; }
+    .badge-accepted { background:#3498db22; color:var(--blue);    border:1px solid #3498db44; }
+    .badge-completed{ background:#2ecc7122; color:var(--green);   border:1px solid #2ecc7144; }
+    .badge-declined { background:#e74c3c22; color:#e74c3c;        border:1px solid #e74c3c44; }
+    .badge-expired  { background:#e67e2222; color:var(--orange);  border:1px solid #e67e2244; }
+    .badge-chevron  { color: var(--muted); font-size: .85rem; }
+
+    .no-orders { text-align: center; color: var(--muted); font-size: .88rem; padding: 1.5rem 0; }
+
+    footer { margin-top: 3rem; font-size: .75rem; color: var(--muted); text-align: center; }
     footer a { color: var(--red); text-decoration: none; }
   </style>
 </head>
@@ -196,21 +167,22 @@
   <div class="card">
     <div class="card-head">
       <h1>Track Your Order</h1>
-      <p>Enter your order ID to check the current status of your boost.</p>
+      <p>Enter your <strong>email address</strong> to see all your orders, or paste your <strong>Order ID</strong> for a specific order.</p>
     </div>
     <div class="card-body">
 
       <!-- Search -->
       <div id="searchSection">
         <form id="searchForm">
-          <input id="orderIdInput" type="text" placeholder="Paste your order ID here…" autocomplete="off" spellcheck="false"/>
+          <input id="searchInput" type="text" placeholder="Email address or Order ID…" autocomplete="off" spellcheck="false"/>
           <button id="searchBtn" type="submit">Track</button>
         </form>
+        <div class="hint">Your Order ID was shown after checkout and is in your confirmation email.</div>
         <div id="errMsg" class="err-msg"></div>
       </div>
 
-      <!-- Order detail -->
-      <div id="orderDetail">
+      <!-- Single order detail -->
+      <div id="orderDetail" style="display:none">
         <div id="statusBanner" class="status-banner">
           <div class="status-icon" id="statusIcon"></div>
           <div>
@@ -219,18 +191,22 @@
             <div class="status-sub"   id="statusSub"></div>
           </div>
         </div>
-
         <div id="detailRows"></div>
-
-        <div class="order-id-box">
+        <div class="oid-box">
           <div>
             <div class="oid-label">Order ID</div>
             <div class="oid-val" id="oidDisplay"></div>
           </div>
           <button class="copy-btn" id="copyBtn">Copy</button>
         </div>
+        <button class="back-btn" id="backFromDetail">← Search again</button>
+      </div>
 
-        <button class="back-link" id="backBtn">← Look up a different order</button>
+      <!-- Email multi-order list -->
+      <div id="orderList" style="display:none">
+        <div class="orders-label" id="listLabel"></div>
+        <div id="orderRows"></div>
+        <button class="back-btn" id="backFromList">← Search again</button>
       </div>
 
     </div>
@@ -242,25 +218,25 @@
 
   <script>
     const STATUS_CONFIG = {
-      pending:   { icon: '⏳', cls: 'status-pending',   label: 'Pending',   title: 'Waiting for a booster',          sub: 'Your payment is reserved but not charged yet. A booster will accept your order shortly.' },
-      accepted:  { icon: '✅', cls: 'status-accepted',  label: 'Accepted',  title: 'A booster is on your order!',     sub: 'Your card has been charged. Your boost will start at the scheduled time.' },
-      completed: { icon: '🏆', cls: 'status-completed', label: 'Completed', title: 'Your boost is complete!',         sub: 'Your order has been finished. Enjoy your new rank!' },
-      declined:  { icon: '❌', cls: 'status-declined',  label: 'Declined',  title: 'No booster was available',        sub: 'Your order was declined. Your card was not charged — the hold has been fully released.' },
-      expired:   { icon: '⌛', cls: 'status-expired',   label: 'Expired',   title: 'Order expired',                   sub: 'No booster accepted within 24 hours. Your card was not charged.' },
+      pending:   { icon:'⏳', cls:'status-pending',   label:'Pending',   title:'Waiting for a booster',         sub:'Your payment is reserved but not charged yet. A booster will accept your order shortly.' },
+      accepted:  { icon:'✅', cls:'status-accepted',  label:'Accepted',  title:'Booster confirmed — boost in progress!', sub:'Your card has been charged. Your boost is underway.' },
+      completed: { icon:'🏆', cls:'status-completed', label:'Completed', title:'Your boost is complete!',        sub:'Your order has been finished. Enjoy your new rank!' },
+      declined:  { icon:'❌', cls:'status-declined',  label:'Declined',  title:'No booster was available',       sub:'Your order was declined. Your card was not charged — the hold has been fully released.' },
+      expired:   { icon:'⌛', cls:'status-expired',   label:'Expired',   title:'Order expired',                  sub:'No booster accepted within 24 hours. Your card was not charged.' },
     };
 
-    function fmt(cents) {
-      return '£' + (cents / 100).toFixed(2);
+    function fmtGBP(cents) { return '£' + ((cents || 0) / 100).toFixed(2); }
+    function fmtDate(unix)  { return unix ? new Date(unix * 1000).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : null; }
+    function fmtDateShort(unix) { return unix ? new Date(unix * 1000).toLocaleDateString('en-GB', { dateStyle: 'medium' }) : null; }
+
+    function showSection(name) {
+      ['searchSection','orderDetail','orderList'].forEach(id => {
+        document.getElementById(id).style.display = id === name ? '' : 'none';
+      });
     }
 
-    function fmtDate(unix) {
-      if (!unix) return null;
-      return new Date(unix * 1000).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
-    }
-
-    function showOrder(order) {
+    function renderSingleOrder(order) {
       const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
-
       const banner = document.getElementById('statusBanner');
       banner.className = 'status-banner ' + cfg.cls;
       document.getElementById('statusIcon').textContent  = cfg.icon;
@@ -268,9 +244,7 @@
       document.getElementById('statusTitle').textContent = cfg.title;
       document.getElementById('statusSub').textContent   = cfg.sub;
 
-      const rows = [];
-      rows.push(['Service',    order.service || '—']);
-      rows.push(['Amount',     fmt(order.amount_cents || 0)]);
+      const rows = [['Service', order.service || '—'], ['Amount', fmtGBP(order.amount_cents)]];
       if (order.options) rows.push(['Options', order.options]);
       if (order.addons)  rows.push(['Add-ons', order.addons]);
       const start = fmtDate(order.scheduled_start);
@@ -279,74 +253,113 @@
       if (end)   rows.push(['Est. finish', end]);
       rows.push(['Ordered', fmtDate(order.created_at) || '—']);
 
-      document.getElementById('detailRows').innerHTML = rows.map(([label, val]) => `
-        <div class="detail-row">
-          <span class="detail-label">${label}</span>
-          <span class="detail-value">${val}</span>
-        </div>
-      `).join('');
+      document.getElementById('detailRows').innerHTML = rows.map(([l, v]) =>
+        `<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${v}</span></div>`
+      ).join('');
 
       document.getElementById('oidDisplay').textContent = order.id;
-
-      document.getElementById('searchSection').style.display = 'none';
-      document.getElementById('orderDetail').style.display   = '';
+      showSection('orderDetail');
     }
 
-    async function lookup(id) {
-      const btn    = document.getElementById('searchBtn');
-      const errMsg = document.getElementById('errMsg');
-      errMsg.textContent = '';
+    function renderOrderList(orders) {
+      const label = document.getElementById('listLabel');
+      const rows  = document.getElementById('orderRows');
+      label.textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''} found`;
+
+      if (!orders.length) {
+        rows.innerHTML = '<div class="no-orders">No orders found for that email address.</div>';
+        showSection('orderList');
+        return;
+      }
+
+      rows.innerHTML = orders.map(o => {
+        const badgeCls = `badge-${o.status}`;
+        const date = fmtDateShort(o.created_at) || '';
+        return `<div class="order-row" onclick="loadOrder('${o.id}')">
+          <div class="order-row-left">
+            <div class="order-row-svc">${esc(o.service || '—')}</div>
+            <div class="order-row-date">${date}</div>
+          </div>
+          <div class="order-row-right">
+            <span class="order-row-price">${fmtGBP(o.amount_cents)}</span>
+            <span class="badge ${badgeCls}">${o.status}</span>
+            <span class="badge-chevron">›</span>
+          </div>
+        </div>`;
+      }).join('');
+
+      showSection('orderList');
+    }
+
+    async function lookup(query) {
+      const btn = document.getElementById('searchBtn');
+      const err = document.getElementById('errMsg');
+      err.textContent = '';
       btn.disabled = true;
       btn.textContent = 'Looking up…';
 
+      const q = query.trim();
       try {
-        const res = await fetch('/api/portal/' + encodeURIComponent(id.trim()));
-        if (res.status === 404) {
-          errMsg.textContent = 'Order not found. Please check your order ID and try again.';
-          return;
+        if (q.includes('@')) {
+          // email lookup
+          const res = await fetch('/api/portal/by-email?email=' + encodeURIComponent(q));
+          if (!res.ok) { err.textContent = 'Something went wrong. Please try again.'; return; }
+          renderOrderList(await res.json());
+        } else {
+          // order ID lookup
+          const res = await fetch('/api/portal/' + encodeURIComponent(q));
+          if (res.status === 404) { err.textContent = 'Order not found. Check your Order ID and try again.'; return; }
+          if (!res.ok) { err.textContent = 'Something went wrong. Please try again.'; return; }
+          renderSingleOrder(await res.json());
         }
-        if (!res.ok) {
-          errMsg.textContent = 'Something went wrong. Please try again.';
-          return;
-        }
-        const order = await res.json();
-        showOrder(order);
       } catch (e) {
-        errMsg.textContent = 'Could not connect. Please try again.';
+        err.textContent = 'Could not connect. Please try again.';
       } finally {
         btn.disabled = false;
         btn.textContent = 'Track';
       }
     }
 
+    async function loadOrder(id) {
+      try {
+        const res = await fetch('/api/portal/' + encodeURIComponent(id));
+        if (!res.ok) return;
+        renderSingleOrder(await res.json());
+      } catch (e) { /* ignore */ }
+    }
+
+    function esc(s) {
+      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function resetSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('errMsg').textContent = '';
+      showSection('searchSection');
+    }
+
     document.getElementById('searchForm').addEventListener('submit', e => {
       e.preventDefault();
-      const id = document.getElementById('orderIdInput').value.trim();
-      if (!id) { document.getElementById('errMsg').textContent = 'Please enter your order ID.'; return; }
-      lookup(id);
-    });
-
-    document.getElementById('backBtn').addEventListener('click', () => {
-      document.getElementById('orderDetail').style.display   = 'none';
-      document.getElementById('searchSection').style.display = '';
-      document.getElementById('orderIdInput').value = '';
-      document.getElementById('errMsg').textContent = '';
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) { document.getElementById('errMsg').textContent = 'Please enter your email or Order ID.'; return; }
+      lookup(q);
     });
 
     document.getElementById('copyBtn').addEventListener('click', () => {
-      const oid = document.getElementById('oidDisplay').textContent;
-      navigator.clipboard.writeText(oid).then(() => {
+      navigator.clipboard.writeText(document.getElementById('oidDisplay').textContent).then(() => {
         const btn = document.getElementById('copyBtn');
         btn.textContent = 'Copied!';
         setTimeout(() => btn.textContent = 'Copy', 2000);
       });
     });
 
-    // Auto-load from URL param
-    const params = new URLSearchParams(location.search);
-    const autoId = params.get('order');
+    document.getElementById('backFromDetail').addEventListener('click', resetSearch);
+    document.getElementById('backFromList').addEventListener('click', resetSearch);
+
+    // Auto-load order ID from URL ?order=
+    const autoId = new URLSearchParams(location.search).get('order');
     if (autoId) {
-      document.getElementById('orderIdInput').value = autoId;
+      document.getElementById('searchInput').value = autoId;
       lookup(autoId);
     }
   </script>
