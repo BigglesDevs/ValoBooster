@@ -24,9 +24,9 @@ app.post('/create-checkout', async (req, res) => {
   }
 
   const port    = process.env.PORT || 3000;
-  const siteUrl = process.env.RAILWAY_PUBLIC_DOMAIN
-    ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
-    : (process.env.SITE_URL || `http://localhost:${port}`);
+  const siteUrl = process.env.SITE_URL
+    || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : null)
+    || `http://localhost:${port}`;
 
   const params = new URLSearchParams();
   params.append('payment_method_types[]',                        'card');
