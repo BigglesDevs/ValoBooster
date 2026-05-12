@@ -100,6 +100,9 @@ function renderOrders() {
     const canComplete = o.status === 'accepted' && (me.role === 'admin' || o.booster_id === me.id);
     const badgeClass  = { pending:'badge-pending', accepted:'badge-accepted', completed:'badge-completed', declined:'badge-pending', expired:'badge-pending' }[o.status] || 'badge-pending';
 
+    const canChat = ['accepted','completed'].includes(o.status) && (me.role === 'admin' || o.booster_id === me.id);
+    const msgBadge = o.msg_count > 0 ? ` <span style="font-size:.7rem;opacity:.7">(${o.msg_count})</span>` : '';
+
     return `<tr>
       <td><strong>${esc(o.service)}</strong></td>
       <td style="font-size:.8rem">${esc(o.customer_email || '—')}</td>
@@ -112,6 +115,7 @@ function renderOrders() {
           ${canAccept   ? `<button class="btn btn-primary btn-sm" onclick="acceptOrder('${o.id}')">Accept</button>` : ''}
           ${canSchedule ? `<button class="btn btn-ghost btn-sm" onclick="openSchedule('${o.id}')">Schedule</button>` : ''}
           ${canComplete ? `<button class="btn btn-success btn-sm" onclick="completeOrder('${o.id}')">Complete</button>` : ''}
+          ${canChat     ? `<button class="btn btn-ghost btn-sm" onclick="openChat('${o.id}')">💬 Chat${msgBadge}</button>` : ''}
           ${canDecline  ? `<button class="btn btn-danger btn-sm" onclick="declineOrder('${o.id}')">Decline</button>` : ''}
         </div>
       </td>
@@ -341,10 +345,85 @@ async function toggleBlock(date) {
   renderCalendar();
 }
 
+// ── Chat modal ────────────────────────────────────────────────────────────────
+let chatOrderId    = null;
+let chatPollTimer  = null;
+let chatLastCount  = 0;
+
+document.getElementById('chatClose').addEventListener('click', closeChat);
+document.getElementById('chatSend').addEventListener('click', sendAdminMsg);
+document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendAdminMsg(); });
+
+function openChat(orderId) {
+  chatOrderId = orderId;
+  const order = orders.find(o => o.id === orderId);
+  document.getElementById('chatModalTitle').textContent =
+    `Chat — ${order ? esc(order.service) : orderId}`;
+  document.getElementById('chatInput').value = '';
+  document.getElementById('chatModal').classList.remove('hidden');
+  chatLastCount = 0;
+  loadAdminMessages();
+  clearInterval(chatPollTimer);
+  chatPollTimer = setInterval(loadAdminMessages, 8000);
+}
+
+function closeChat() {
+  clearInterval(chatPollTimer);
+  chatPollTimer = null;
+  chatOrderId   = null;
+  document.getElementById('chatModal').classList.add('hidden');
+}
+
+async function loadAdminMessages() {
+  if (!chatOrderId) return;
+  const res = await fetch(`/admin/api/orders/${chatOrderId}/messages`);
+  if (!res.ok) return;
+  const msgs = await res.json();
+
+  if (msgs.length === chatLastCount) return;
+  chatLastCount = msgs.length;
+
+  const box = document.getElementById('chatMsgs');
+  const myName = me.display_name || me.email.split('@')[0];
+
+  if (!msgs.length) {
+    box.innerHTML = '<div class="chat-empty">No messages yet</div>';
+    return;
+  }
+
+  box.innerHTML = msgs.map(m => {
+    const isMe = m.sender_role === 'booster' && m.sender_name === myName;
+    const time = new Date(m.created_at * 1000).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    return `<div class="bubble ${isMe ? 'me' : 'other'}">
+      ${!isMe ? `<div class="bubble-name">${esc(m.sender_name)}</div>` : ''}
+      ${esc(m.body)}
+      <div class="bubble-time">${time}</div>
+    </div>`;
+  }).join('');
+
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendAdminMsg() {
+  const input = document.getElementById('chatInput');
+  const body  = input.value.trim();
+  if (!body || !chatOrderId) return;
+  input.value = '';
+  const res = await fetch(`/admin/api/orders/${chatOrderId}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body }),
+  });
+  if (!res.ok) { const d = await res.json(); return alert(d.error); }
+  chatLastCount = 0;
+  await loadAdminMessages();
+}
+
 // expose for inline onclick handlers
 window.acceptOrder   = acceptOrder;
 window.declineOrder  = declineOrder;
 window.completeOrder = completeOrder;
 window.openSchedule  = openSchedule;
+window.openChat      = openChat;
 window.removeBooster = removeBooster;
 window.toggleBlock   = toggleBlock;

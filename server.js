@@ -9,6 +9,7 @@ const { sendOrderEmail } = require('./src/utils/mailer');
 const db             = require('./src/db');
 const adminRouter    = require('./src/routes/admin');
 const customerRouter = require('./src/routes/customer');
+const authRouter     = require('./src/routes/auth');
 
 const app = express();
 
@@ -16,6 +17,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', adminRouter);
 app.use('/api/customer', customerRouter);
+app.use('/auth', authRouter);
+
+// Discord server invite redirect
+app.get('/api/discord', (req, res) => {
+  const invite = process.env.DISCORD_INVITE;
+  if (!invite) return res.status(404).send('DISCORD_INVITE not set in environment');
+  res.redirect(invite);
+});
 
 // ── Stripe helpers ────────────────────────────────────────────────────────────
 async function stripePost(endpoint, params) {

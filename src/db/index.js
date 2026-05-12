@@ -56,13 +56,25 @@ db.exec(`
     email         TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     display_name  TEXT,
+    discord_id    TEXT UNIQUE,
+    google_id     TEXT UNIQUE,
+    avatar_url    TEXT,
     created_at    INTEGER DEFAULT (unixepoch())
   );
 
   CREATE TABLE IF NOT EXISTS customer_sessions (
-    token      TEXT PRIMARY KEY,
+    token       TEXT PRIMARY KEY,
     customer_id TEXT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-    expires_at INTEGER NOT NULL
+    expires_at  INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS messages (
+    id          TEXT PRIMARY KEY,
+    order_id    TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    sender_role TEXT NOT NULL,
+    sender_name TEXT NOT NULL,
+    body        TEXT NOT NULL,
+    created_at  INTEGER DEFAULT (unixepoch())
   );
 `);
 
@@ -71,6 +83,9 @@ for (const col of [
   'ALTER TABLE orders ADD COLUMN payment_intent_id TEXT',
   'ALTER TABLE orders ADD COLUMN scheduled_start INTEGER',
   'ALTER TABLE orders ADD COLUMN customer_id TEXT REFERENCES customers(id) ON DELETE SET NULL',
+  'ALTER TABLE customers ADD COLUMN discord_id TEXT',
+  'ALTER TABLE customers ADD COLUMN google_id TEXT',
+  'ALTER TABLE customers ADD COLUMN avatar_url TEXT',
 ]) { try { db.exec(col); } catch (_) {} }
 
 module.exports = db;

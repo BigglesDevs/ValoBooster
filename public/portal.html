@@ -6,550 +6,602 @@
   <title>My Orders — ValoBooster</title>
   <link rel="icon" href="/favicon.png"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:      #0d0d14;
-      --surface: #15151f;
-      --card:    #1c1c28;
-      --border:  #2a2a3a;
-      --red:     #ff4655;
-      --red-dim: #cc3544;
-      --text:    #e2e2e2;
-      --muted:   #777;
-      --green:   #2ecc71;
-      --yellow:  #f1c40f;
-      --blue:    #3498db;
-      --orange:  #e67e22;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d0d14;--surface:#15151f;--card:#1c1c28;--border:#2a2a3a;
+      --red:#ff4655;--red-dim:#cc3544;--text:#e2e2e2;--muted:#777;
+      --green:#2ecc71;--yellow:#f1c40f;--blue:#3498db;--orange:#e67e22;
     }
-    body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-    /* ── Top nav ── */
-    .topnav { display:flex; align-items:center; justify-content:space-between; padding:.9rem 1.4rem; border-bottom:1px solid var(--border); background:var(--surface); }
-    .topnav-logo { font-size:1.1rem; font-weight:800; text-decoration:none; color:var(--text); }
-    .topnav-logo span { color:var(--red); }
-    .topnav-right { display:flex; align-items:center; gap:.7rem; }
-    .topnav-user { font-size:.82rem; color:var(--muted); }
-    .topnav-user strong { color:var(--text); display:block; font-size:.88rem; }
+    /* nav */
+    .topnav{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.4rem;border-bottom:1px solid var(--border);background:var(--surface)}
+    .topnav-logo{font-size:1.1rem;font-weight:800;text-decoration:none;color:var(--text)}
+    .topnav-logo span{color:var(--red)}
+    .topnav-right{display:flex;align-items:center;gap:.7rem}
+    .topnav-user{font-size:.78rem;color:var(--muted)}
+    .topnav-user strong{color:var(--text);display:block;font-size:.85rem}
+    .logout-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:.4rem .85rem;font-size:.78rem;cursor:pointer;transition:all .15s}
+    .logout-btn:hover{border-color:#e74c3c;color:#e74c3c}
 
-    /* ── Layout ── */
-    .wrap { max-width:580px; margin:0 auto; padding:2rem 1rem 4rem; }
+    /* layout */
+    .wrap{max-width:580px;margin:0 auto;padding:2rem 1rem 4rem}
 
-    /* ── Auth card (login/register) ── */
-    .auth-card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
-    .auth-logo { text-align:center; padding:2rem 1.6rem 1rem; }
-    .auth-logo h1 { font-size:1.3rem; font-weight:800; }
-    .auth-logo h1 span { color:var(--red); }
-    .auth-logo p { color:var(--muted); font-size:.82rem; margin-top:.3rem; }
+    /* auth card */
+    .auth-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+    .auth-logo{text-align:center;padding:2rem 1.6rem 1.2rem}
+    .auth-logo h1{font-size:1.3rem;font-weight:800}
+    .auth-logo h1 span{color:var(--red)}
+    .auth-logo p{color:var(--muted);font-size:.82rem;margin-top:.3rem}
+    .auth-tabs{display:flex;border-bottom:1px solid var(--border)}
+    .auth-tab{flex:1;padding:.8rem;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .auth-tab.active{color:var(--text);border-bottom-color:var(--red);background:#ff465508}
+    .auth-form{padding:1.4rem;display:none}
+    .auth-form.active{display:block}
 
-    .auth-tabs { display:flex; border-bottom:1px solid var(--border); }
-    .auth-tab {
-      flex:1; padding:.85rem; background:none; border:none; color:var(--muted);
-      font-size:.88rem; font-weight:600; cursor:pointer; border-bottom:2px solid transparent;
-      transition:all .15s;
-    }
-    .auth-tab.active { color:var(--text); border-bottom-color:var(--red); background:#ff465508; }
+    /* fields */
+    .field{margin-bottom:1rem}
+    .field label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.05em}
+    .field input{width:100%;padding:.7rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;outline:none;transition:border-color .2s}
+    .field input:focus{border-color:var(--red)}
 
-    .auth-form { padding:1.6rem; display:none; }
-    .auth-form.active { display:block; }
+    /* buttons */
+    .btn-primary{width:100%;padding:.72rem;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .15s;margin-top:.2rem}
+    .btn-primary:hover{background:var(--red-dim)}
+    .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+    .auth-err{color:#e74c3c;font-size:.8rem;margin-top:.6rem;text-align:center;min-height:1em}
 
-    .field { margin-bottom:1.1rem; }
-    .field label { display:block; font-size:.78rem; color:var(--muted); margin-bottom:.35rem; text-transform:uppercase; letter-spacing:.05em; }
-    .field input {
-      width:100%; padding:.7rem 1rem; background:var(--surface);
-      border:1px solid var(--border); border-radius:8px; color:var(--text);
-      font-size:.92rem; outline:none; transition:border-color .2s;
-    }
-    .field input:focus { border-color:var(--red); }
+    /* OAuth buttons */
+    .oauth-divider{display:flex;align-items:center;gap:.7rem;margin:1.1rem 0}
+    .oauth-divider::before,.oauth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+    .oauth-divider span{font-size:.72rem;color:var(--muted);white-space:nowrap}
+    .oauth-btns{display:flex;gap:.6rem;margin-bottom:.6rem}
+    .oauth-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.65rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.82rem;font-weight:600;cursor:pointer;text-decoration:none;transition:border-color .15s}
+    .oauth-btn:hover{border-color:var(--red)}
+    .oauth-btn svg{width:16px;height:16px;flex-shrink:0}
 
-    .btn-primary {
-      width:100%; padding:.75rem; background:var(--red); color:#fff; border:none;
-      border-radius:8px; font-size:.92rem; font-weight:600; cursor:pointer;
-      transition:background .15s; margin-top:.3rem;
-    }
-    .btn-primary:hover { background:var(--red-dim); }
-    .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+    /* guest track link */
+    .guest-link-row{text-align:center;padding:.9rem 1.4rem 1.2rem;border-top:1px solid var(--border)}
+    .guest-link-row a{color:var(--red);font-size:.82rem;cursor:pointer;text-decoration:none}
+    .guest-link-row a:hover{text-decoration:underline}
 
-    .auth-err { color:#e74c3c; font-size:.82rem; margin-top:.6rem; text-align:center; min-height:1.1em; }
+    /* error banner */
+    .error-banner{background:#e74c3c22;border:1px solid #e74c3c44;color:#e74c3c;border-radius:10px;padding:.8rem 1rem;font-size:.82rem;margin-bottom:1rem;display:none}
 
-    .divider { display:flex; align-items:center; gap:.7rem; margin:1.2rem 0; }
-    .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
-    .divider span { font-size:.75rem; color:var(--muted); white-space:nowrap; }
+    /* dashboard */
+    .dash-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem}
+    .dash-header h1{font-size:1.2rem;font-weight:700}
+    .dash-header p{font-size:.8rem;color:var(--muted);margin-top:.2rem}
+    .new-order-btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none;flex-shrink:0}
+    .new-order-btn:hover{background:var(--red-dim)}
 
-    .guest-btn {
-      width:100%; padding:.65rem; background:none; border:1px solid var(--border);
-      border-radius:8px; color:var(--muted); font-size:.85rem; cursor:pointer;
-      transition:all .15s;
-    }
-    .guest-btn:hover { border-color:var(--red); color:var(--red); }
+    .orders-list{display:flex;flex-direction:column;gap:.55rem}
+    .order-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.95rem 1.1rem;cursor:pointer;transition:border-color .15s;display:flex;align-items:center;gap:.9rem}
+    .order-row:hover{border-color:var(--red)}
+    .order-row-main{flex:1;min-width:0}
+    .order-row-svc{font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .order-row-meta{font-size:.72rem;color:var(--muted);margin-top:.2rem}
+    .order-row-right{display:flex;align-items:center;gap:.45rem;flex-shrink:0}
+    .order-row-price{font-size:.88rem;font-weight:600}
+    .msg-badge{background:var(--red);color:#fff;border-radius:20px;font-size:.65rem;font-weight:700;padding:.1rem .4rem}
+    .chev{color:var(--muted);font-size:1.1rem}
+    .empty{text-align:center;color:var(--muted);padding:3rem 0;font-size:.88rem}
+    .empty a{color:var(--red);text-decoration:none}
 
-    /* ── Dashboard ── */
-    .dash-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.6rem; }
-    .dash-header h1 { font-size:1.2rem; font-weight:700; }
-    .dash-header p  { font-size:.8rem; color:var(--muted); margin-top:.2rem; }
-    .logout-btn {
-      background:none; border:1px solid var(--border); border-radius:8px;
-      color:var(--muted); padding:.45rem .9rem; font-size:.8rem; cursor:pointer;
-      transition:all .15s; flex-shrink:0;
-    }
-    .logout-btn:hover { border-color:#e74c3c; color:#e74c3c; }
+    /* badges */
+    .badge{display:inline-block;padding:.18rem .5rem;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .badge-pending {background:#f1c40f22;color:var(--yellow);border:1px solid #f1c40f44}
+    .badge-accepted{background:#3498db22;color:var(--blue);  border:1px solid #3498db44}
+    .badge-completed{background:#2ecc7122;color:var(--green);border:1px solid #2ecc7144}
+    .badge-declined{background:#e74c3c22;color:#e74c3c;     border:1px solid #e74c3c44}
+    .badge-expired {background:#e67e2222;color:var(--orange);border:1px solid #e67e2244}
 
-    .orders-list { display:flex; flex-direction:column; gap:.6rem; }
-    .order-row {
-      background:var(--card); border:1px solid var(--border); border-radius:10px;
-      padding:1rem 1.2rem; cursor:pointer; transition:border-color .15s;
-      display:flex; align-items:center; gap:1rem;
-    }
-    .order-row:hover { border-color:var(--red); }
-    .order-row-main { flex:1; min-width:0; }
-    .order-row-svc   { font-size:.9rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .order-row-meta  { font-size:.75rem; color:var(--muted); margin-top:.2rem; }
-    .order-row-right { display:flex; align-items:center; gap:.5rem; flex-shrink:0; }
-    .order-row-price { font-size:.88rem; font-weight:600; }
-    .chev { color:var(--muted); font-size:1.1rem; }
+    /* detail */
+    .detail-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+    .detail-head{display:flex;align-items:center;justify-content:space-between;padding:.95rem 1.2rem;border-bottom:1px solid var(--border)}
+    .detail-head h2{font-size:.95rem;font-weight:700}
+    .back-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.82rem;transition:color .15s}
+    .back-btn:hover{color:var(--text)}
+    .status-banner{display:flex;align-items:center;gap:.9rem;padding:1rem 1.2rem;margin:1.1rem;border-radius:10px}
+    .status-icon{font-size:1.7rem;flex-shrink:0}
+    .status-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;opacity:.8}
+    .status-title{font-size:.95rem;font-weight:700;margin-top:.1rem}
+    .status-sub{font-size:.78rem;opacity:.75;margin-top:.2rem;line-height:1.4}
+    .status-pending {background:#f1c40f15;border:1px solid #f1c40f33;color:var(--yellow)}
+    .status-accepted{background:#3498db15;border:1px solid #3498db33;color:var(--blue)}
+    .status-completed{background:#2ecc7115;border:1px solid #2ecc7133;color:var(--green)}
+    .status-declined{background:#e74c3c15;border:1px solid #e74c3c33;color:#e74c3c}
+    .status-expired {background:#e67e2215;border:1px solid #e67e2233;color:var(--orange)}
+    .detail-rows{padding:0 1.2rem .4rem}
+    .detail-row{display:flex;justify-content:space-between;align-items:baseline;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.86rem}
+    .detail-row:last-child{border-bottom:none}
+    .dl{color:var(--muted)}
+    .dv{font-weight:600;text-align:right;max-width:65%}
+    .oid-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;margin:0 1.2rem .6rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+    .oid-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    .oid-val{font-family:monospace;font-size:.74rem;color:var(--text);word-break:break-all;margin-top:.1rem}
+    .copy-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:.28rem .55rem;font-size:.72rem;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+    .copy-btn:hover{border-color:var(--red);color:var(--red)}
 
-    .badge {
-      display:inline-block; padding:.2rem .55rem; border-radius:20px;
-      font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
-    }
-    .badge-pending   { background:#f1c40f22; color:var(--yellow);  border:1px solid #f1c40f44; }
-    .badge-accepted  { background:#3498db22; color:var(--blue);    border:1px solid #3498db44; }
-    .badge-completed { background:#2ecc7122; color:var(--green);   border:1px solid #2ecc7144; }
-    .badge-declined  { background:#e74c3c22; color:#e74c3c;        border:1px solid #e74c3c44; }
-    .badge-expired   { background:#e67e2222; color:var(--orange);  border:1px solid #e67e2244; }
+    /* chat */
+    .chat-section{margin:0 1.2rem 1.2rem}
+    .chat-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+    .chat-msgs{height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;padding:.8rem;background:var(--surface);border:1px solid var(--border);border-radius:10px 10px 0 0}
+    .chat-msgs::-webkit-scrollbar{width:4px}
+    .chat-msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+    .bubble{max-width:78%;padding:.55rem .8rem;border-radius:12px;font-size:.82rem;line-height:1.45;word-break:break-word}
+    .bubble.me{background:var(--red);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+    .bubble.other{background:#22222e;border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+    .bubble-name{font-size:.62rem;opacity:.7;margin-bottom:.15rem}
+    .bubble-time{font-size:.6rem;margin-top:.2rem;opacity:.6;text-align:right}
+    .bubble.other .bubble-time{text-align:left}
+    .chat-empty{text-align:center;color:var(--muted);font-size:.78rem;padding:2rem 0}
+    .chat-input-row{display:flex;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:.6rem;gap:.45rem}
+    .chat-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.5rem .8rem;color:var(--text);font-size:.84rem;outline:none;transition:border-color .2s}
+    .chat-input:focus{border-color:var(--red)}
+    .chat-send{background:var(--red);color:#fff;border:none;border-radius:6px;padding:.5rem .95rem;font-size:.82rem;font-weight:600;cursor:pointer;flex-shrink:0}
+    .chat-send:disabled{opacity:.5}
+    .chat-must-login{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;font-size:.82rem;color:var(--muted)}
+    .chat-must-login a{color:var(--red);cursor:pointer}
 
-    .empty { text-align:center; color:var(--muted); padding:3rem 0; font-size:.9rem; }
-    .empty a { color:var(--red); text-decoration:none; }
+    /* guest search */
+    .guest-card{background:var(--card);border:1px solid var(--border);border-radius:14px}
+    .guest-head{padding:1.2rem 1.4rem;border-bottom:1px solid var(--border)}
+    .guest-head h2{font-size:.95rem;font-weight:700}
+    .guest-head p{font-size:.78rem;color:var(--muted);margin-top:.25rem}
+    .guest-body{padding:1.2rem 1.4rem}
+    .guest-form{display:flex;gap:.5rem}
+    .guest-input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;color:var(--text);font-size:.88rem;outline:none;transition:border-color .2s}
+    .guest-input:focus{border-color:var(--red)}
+    .guest-btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:.65rem 1.1rem;font-size:.88rem;font-weight:600;cursor:pointer;flex-shrink:0}
+    .guest-btn:disabled{opacity:.5}
+    .guest-hint{font-size:.74rem;color:var(--muted);margin-top:.5rem}
+    .guest-err{color:#e74c3c;font-size:.8rem;margin-top:.5rem;min-height:1em}
+    .signin-prompt{margin-top:1.1rem;text-align:center;font-size:.8rem;color:var(--muted)}
+    .signin-prompt a{color:var(--red);cursor:pointer;text-decoration:none}
 
-    /* ── Order detail panel ── */
-    .detail-card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-top:.6rem; }
-    .detail-head { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.2rem; border-bottom:1px solid var(--border); }
-    .detail-head h2 { font-size:.95rem; font-weight:700; }
-    .back-link { background:none; border:none; color:var(--muted); cursor:pointer; font-size:.82rem; transition:color .15s; }
-    .back-link:hover { color:var(--text); }
-
-    .status-banner {
-      display:flex; align-items:center; gap:.9rem;
-      padding:1rem 1.2rem; margin:1.2rem; border-radius:10px;
-    }
-    .status-icon  { font-size:1.6rem; flex-shrink:0; }
-    .status-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; font-weight:700; opacity:.8; }
-    .status-title { font-size:.95rem; font-weight:700; margin-top:.1rem; }
-    .status-sub   { font-size:.78rem; opacity:.75; margin-top:.2rem; line-height:1.4; }
-
-    .status-pending  { background:#f1c40f15; border:1px solid #f1c40f33; color:var(--yellow); }
-    .status-accepted { background:#3498db15; border:1px solid #3498db33; color:var(--blue); }
-    .status-completed{ background:#2ecc7115; border:1px solid #2ecc7133; color:var(--green); }
-    .status-declined { background:#e74c3c15; border:1px solid #e74c3c33; color:#e74c3c; }
-    .status-expired  { background:#e67e2215; border:1px solid #e67e2233; color:var(--orange); }
-
-    .detail-rows { padding:0 1.2rem 1.2rem; }
-    .detail-row {
-      display:flex; justify-content:space-between; align-items:baseline;
-      padding:.6rem 0; border-bottom:1px solid var(--border); font-size:.86rem;
-    }
-    .detail-row:last-child { border-bottom:none; }
-    .detail-label { color:var(--muted); flex-shrink:0; }
-    .detail-value { font-weight:600; text-align:right; max-width:65%; }
-
-    .oid-box {
-      background:var(--surface); border:1px solid var(--border); border-radius:8px;
-      padding:.75rem 1rem; margin:0 1.2rem 1.2rem;
-      display:flex; align-items:center; justify-content:space-between; gap:.5rem;
-    }
-    .oid-label { font-size:.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
-    .oid-val   { font-family:monospace; font-size:.76rem; color:var(--text); word-break:break-all; margin-top:.15rem; }
-    .copy-btn {
-      background:none; border:1px solid var(--border); border-radius:6px; color:var(--muted);
-      padding:.3rem .6rem; font-size:.72rem; cursor:pointer; white-space:nowrap; transition:all .15s; flex-shrink:0;
-    }
-    .copy-btn:hover { border-color:var(--red); color:var(--red); }
-
-    /* ── Guest search ── */
-    .guest-card { background:var(--card); border:1px solid var(--border); border-radius:14px; }
-    .guest-card-head { padding:1.2rem 1.4rem; border-bottom:1px solid var(--border); }
-    .guest-card-head h2 { font-size:.95rem; font-weight:700; }
-    .guest-card-head p  { font-size:.78rem; color:var(--muted); margin-top:.25rem; }
-    .guest-card-body { padding:1.2rem 1.4rem; }
-    #guestForm { display:flex; gap:.6rem; }
-    #guestInput {
-      flex:1; min-width:0; background:var(--surface); border:1px solid var(--border);
-      border-radius:8px; padding:.65rem .9rem; color:var(--text); font-size:.88rem;
-      outline:none; transition:border-color .2s;
-    }
-    #guestInput:focus { border-color:var(--red); }
-    #guestBtn {
-      background:var(--red); color:#fff; border:none; border-radius:8px;
-      padding:.65rem 1.1rem; font-size:.88rem; font-weight:600; cursor:pointer; flex-shrink:0;
-    }
-    #guestBtn:disabled { opacity:.5; }
-    .guest-hint { font-size:.75rem; color:var(--muted); margin-top:.5rem; }
-    .guest-err  { color:#e74c3c; font-size:.8rem; margin-top:.5rem; min-height:1.1em; }
-
-    .login-prompt { margin-top:1.2rem; text-align:center; font-size:.82rem; color:var(--muted); }
-    .login-prompt a { color:var(--red); cursor:pointer; text-decoration:none; }
-    .login-prompt a:hover { text-decoration:underline; }
-
-    footer { text-align:center; font-size:.75rem; color:var(--muted); padding:2rem 1rem; }
-    footer a { color:var(--red); text-decoration:none; }
+    footer{text-align:center;font-size:.74rem;color:var(--muted);padding:2rem 1rem}
+    footer a{color:var(--red);text-decoration:none}
   </style>
 </head>
 <body>
 
-  <nav class="topnav">
-    <a href="/" class="topnav-logo"><span>Valo</span>Booster</a>
-    <div class="topnav-right" id="navRight">
-      <!-- filled by JS -->
-    </div>
-  </nav>
+<nav class="topnav">
+  <a href="/" class="topnav-logo"><span>Valo</span>Booster</a>
+  <div class="topnav-right" id="navRight"></div>
+</nav>
 
-  <div class="wrap" id="app">
-    <!-- filled by JS -->
-  </div>
+<div class="wrap">
+  <div id="errorBanner" class="error-banner"></div>
+  <div id="app"></div>
+</div>
 
-  <footer>ValoBooster &bull; <a href="/">Back to site</a></footer>
+<footer>ValoBooster &bull; <a href="/">Back to site</a></footer>
 
-  <script>
-  // ── Config ────────────────────────────────────────────────────────────────
-  const STATUS_CFG = {
-    pending:   { icon:'⏳', cls:'status-pending',   label:'Pending',   title:'Waiting for a booster',             sub:'Your payment is reserved but not charged yet. A booster will confirm your order shortly.' },
-    accepted:  { icon:'✅', cls:'status-accepted',  label:'Confirmed', title:'Booster confirmed — boost in progress!', sub:'Your card has been charged. Your boost is underway — play along with your booster!' },
-    completed: { icon:'🏆', cls:'status-completed', label:'Completed', title:'Boost complete!',                    sub:'Your order has finished. Enjoy your new rank!' },
-    declined:  { icon:'❌', cls:'status-declined',  label:'Declined',  title:'No booster was available',           sub:'Your order was declined. Your card was not charged — the hold has been fully released.' },
-    expired:   { icon:'⌛', cls:'status-expired',   label:'Expired',   title:'Order expired',                      sub:'No booster accepted within 24 hours. Your card was not charged.' },
-  };
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const STATUS = {
+  pending:  {icon:'⏳',cls:'status-pending',  label:'Pending',  title:'Waiting for a booster',        sub:'Payment reserved but not charged. A booster will confirm soon.'},
+  accepted: {icon:'✅',cls:'status-accepted', label:'Confirmed',title:'Boost in progress!',            sub:'Your card has been charged. Play alongside your booster in duo queue.'},
+  completed:{icon:'🏆',cls:'status-completed',label:'Complete', title:'Your boost is done!',           sub:'Enjoy your new rank!'},
+  declined: {icon:'❌',cls:'status-declined', label:'Declined', title:'No booster was available',     sub:'Your card was not charged — the hold has been fully released.'},
+  expired:  {icon:'⌛',cls:'status-expired',  label:'Expired',  title:'Order expired after 24 hours', sub:'Your card was not charged.'},
+};
 
-  function fmtGBP(c)  { return '£' + ((c||0)/100).toFixed(2); }
-  function fmtDate(u) { return u ? new Date(u*1000).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'}) : null; }
-  function fmtShort(u){ return u ? new Date(u*1000).toLocaleDateString('en-GB',{dateStyle:'medium'}) : ''; }
-  function esc(s)     { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+const DISCORD_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>`;
+const GOOGLE_SVG  = `<svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>`;
 
-  let currentOrders = [];
+function fmtGBP(c){ return '£'+((c||0)/100).toFixed(2) }
+function fmtDate(u){ return u?new Date(u*1000).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'}):null }
+function fmtShort(u){ return u?new Date(u*1000).toLocaleDateString('en-GB',{dateStyle:'medium'}):'—' }
+function fmtTime(u){ return u?new Date(u*1000).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'' }
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 
-  // ── Boot ──────────────────────────────────────────────────────────────────
-  (async () => {
-    const res = await fetch('/api/customer/me');
-    if (res.ok) {
-      const me = await res.json();
-      showDashboard(me);
-    } else {
-      // Check for ?order= auto-load
-      const autoId = new URLSearchParams(location.search).get('order');
-      if (autoId) {
-        showGuestView();
-        document.getElementById('guestInput').value = autoId;
-        guestLookup(autoId);
-      } else {
-        showAuthView();
-      }
-    }
-  })();
+// ── Boot ───────────────────────────────────────────────────────────────────
+let currentOrders = [];
+let currentCustomer = null;
+let chatPollTimer = null;
 
-  // ── Auth view (login / register) ──────────────────────────────────────────
-  function showAuthView() {
-    document.getElementById('navRight').innerHTML = '';
-    document.getElementById('app').innerHTML = `
-      <div class="auth-card">
-        <div class="auth-logo">
-          <h1><span>Valo</span>Booster</h1>
-          <p>Sign in to view and track all your orders</p>
-        </div>
-        <div class="auth-tabs">
-          <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
-          <button class="auth-tab" onclick="switchTab('register')">Create Account</button>
-        </div>
-
-        <!-- Login -->
-        <div class="auth-form active" id="loginForm">
-          <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email"/></div>
-          <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Your password" autocomplete="current-password"/></div>
-          <button class="btn-primary" id="loginBtn" onclick="doLogin()">Sign In</button>
-          <div class="auth-err" id="loginErr"></div>
-          <div class="divider"><span>or track without an account</span></div>
-          <button class="guest-btn" onclick="showGuestView()">Track by Order ID or Email →</button>
-        </div>
-
-        <!-- Register -->
-        <div class="auth-form" id="registerForm">
-          <div class="field"><label>Display Name (optional)</label><input type="text" id="regName" placeholder="Your name" autocomplete="name"/></div>
-          <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="you@email.com" autocomplete="email"/></div>
-          <div class="field"><label>Password <span style="color:var(--muted);font-weight:400">(min 8 chars)</span></label><input type="password" id="regPass" placeholder="Choose a password" autocomplete="new-password"/></div>
-          <button class="btn-primary" id="registerBtn" onclick="doRegister()">Create Account</button>
-          <div class="auth-err" id="registerErr"></div>
-        </div>
-      </div>
-    `;
-    // Allow enter key in forms
-    document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
-    document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
-    document.getElementById('regPass').addEventListener('keydown', e => { if (e.key==='Enter') doRegister(); });
+(async () => {
+  // Show URL error if any
+  const urlErr = new URLSearchParams(location.search).get('error');
+  if (urlErr) {
+    const b = document.getElementById('errorBanner');
+    b.textContent = decodeURIComponent(urlErr);
+    b.style.display = 'block';
   }
 
-  function switchTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
-    document.getElementById('loginForm').classList.toggle('active', tab==='login');
-    document.getElementById('registerForm').classList.toggle('active', tab==='register');
-  }
-
-  async function doLogin() {
-    const btn = document.getElementById('loginBtn');
-    const err = document.getElementById('loginErr');
-    err.textContent = '';
-    btn.disabled = true; btn.textContent = 'Signing in…';
-    try {
-      const res = await fetch('/api/customer/login', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value }),
-      });
-      const d = await res.json();
-      if (!res.ok) { err.textContent = d.error || 'Login failed'; return; }
-      showDashboard(d);
-    } finally { btn.disabled=false; btn.textContent='Sign In'; }
-  }
-
-  async function doRegister() {
-    const btn = document.getElementById('registerBtn');
-    const err = document.getElementById('registerErr');
-    err.textContent = '';
-    btn.disabled = true; btn.textContent = 'Creating account…';
-    try {
-      const res = await fetch('/api/customer/register', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          display_name: document.getElementById('regName').value.trim(),
-          email:        document.getElementById('regEmail').value.trim(),
-          password:     document.getElementById('regPass').value,
-        }),
-      });
-      const d = await res.json();
-      if (!res.ok) { err.textContent = d.error || 'Registration failed'; return; }
-      const me = await (await fetch('/api/customer/me')).json();
-      showDashboard(me);
-    } finally { btn.disabled=false; btn.textContent='Create Account'; }
-  }
-
-  // ── Dashboard ─────────────────────────────────────────────────────────────
-  async function showDashboard(me) {
-    const name = me.display_name || me.email;
-    document.getElementById('navRight').innerHTML = `
-      <span class="topnav-user"><strong>${esc(name)}</strong>${esc(me.email)}</span>
-      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
-    `;
-
-    const res    = await fetch('/api/customer/orders');
-    currentOrders = res.ok ? await res.json() : [];
-
-    renderDashboard(name, currentOrders);
-  }
-
-  function renderDashboard(name, orders) {
+  const res = await fetch('/api/customer/me');
+  if (res.ok) {
+    currentCustomer = await res.json();
+    showDashboard();
+  } else {
     const autoId = new URLSearchParams(location.search).get('order');
+    if (autoId) { showGuestView(); guestLookup(autoId, autoId); }
+    else showAuthView();
+  }
+})();
 
-    let html = `<div class="dash-header">
-      <div><h1>My Orders</h1><p>Welcome back, ${esc(name)}</p></div>
-      <a href="/#order" style="text-decoration:none;background:var(--red);color:#fff;border-radius:8px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;">+ New Order</a>
+// ── Auth view ──────────────────────────────────────────────────────────────
+let pendingClaimId = null;
+
+function showAuthView(tab = 'login', claimId = null) {
+  if (claimId) pendingClaimId = claimId;
+  stopChatPoll();
+  document.getElementById('navRight').innerHTML = '';
+  document.getElementById('app').innerHTML = `
+    <div class="auth-card">
+      <div class="auth-logo">
+        <h1><span>Valo</span>Booster</h1>
+        <p>Sign in to view and manage your orders</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab ${tab==='login'?'active':''}" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab ${tab==='register'?'active':''}" onclick="switchTab('register')">Create Account</button>
+      </div>
+
+      <!-- Login -->
+      <div class="auth-form ${tab==='login'?'active':''}" id="loginForm">
+        <div class="oauth-btns">
+          <a class="oauth-btn" href="/auth/discord">${DISCORD_SVG} Discord</a>
+          <a class="oauth-btn" href="/auth/google">${GOOGLE_SVG} Google</a>
+        </div>
+        <div class="oauth-divider"><span>or sign in with email</span></div>
+        <div class="field"><label>Email</label><input type="email" id="lEmail" placeholder="you@email.com" autocomplete="email"/></div>
+        <div class="field"><label>Password</label><input type="password" id="lPass" placeholder="Your password" autocomplete="current-password"/></div>
+        <button class="btn-primary" id="loginBtn" onclick="doLogin()">Sign In</button>
+        <div class="auth-err" id="loginErr"></div>
+      </div>
+
+      <!-- Register -->
+      <div class="auth-form ${tab==='register'?'active':''}" id="registerForm">
+        <div class="oauth-btns">
+          <a class="oauth-btn" href="/auth/discord">${DISCORD_SVG} Discord</a>
+          <a class="oauth-btn" href="/auth/google">${GOOGLE_SVG} Google</a>
+        </div>
+        <div class="oauth-divider"><span>or create account with email</span></div>
+        <div class="field"><label>Name (optional)</label><input type="text" id="rName" placeholder="Your name" autocomplete="name"/></div>
+        <div class="field"><label>Email</label><input type="email" id="rEmail" placeholder="you@email.com" autocomplete="email"/></div>
+        <div class="field"><label>Password <span style="font-weight:400;color:var(--muted)">(min 8 chars)</span></label><input type="password" id="rPass" placeholder="Choose a password" autocomplete="new-password"/></div>
+        <button class="btn-primary" id="regBtn" onclick="doRegister()">Create Account</button>
+        <div class="auth-err" id="registerErr"></div>
+      </div>
+
+      <div class="guest-link-row">
+        <a onclick="showGuestView()">Track an order without an account →</a>
+      </div>
     </div>`;
 
-    if (!orders.length) {
-      html += `<div class="empty">No orders yet. <a href="/#order">Place your first order →</a></div>`;
-    } else {
-      html += `<div class="orders-list" id="ordersList">` + orders.map(o => {
-        const badgeCls = `badge-${o.status}`;
-        return `<div class="order-row" onclick="openOrderDetail('${o.id}')">
-          <div class="order-row-main">
-            <div class="order-row-svc">${esc(o.service||'—')}</div>
-            <div class="order-row-meta">${fmtShort(o.created_at)}${o.scheduled_start ? ' · Scheduled '+fmtDate(o.scheduled_start) : ''}</div>
-          </div>
-          <div class="order-row-right">
-            <span class="order-row-price">${fmtGBP(o.amount_cents)}</span>
-            <span class="badge ${badgeCls}">${o.status}</span>
-            <span class="chev">›</span>
-          </div>
-        </div>`;
-      }).join('') + `</div>`;
-    }
+  document.getElementById('lPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  document.getElementById('rPass').addEventListener('keydown', e => { if(e.key==='Enter') doRegister(); });
+}
 
-    document.getElementById('app').innerHTML = html;
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) =>
+    t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1)));
+  document.getElementById('loginForm').classList.toggle('active', tab==='login');
+  document.getElementById('registerForm').classList.toggle('active', tab==='register');
+}
 
-    // Auto-open order from URL param
-    if (autoId && orders.find(o => o.id === autoId)) {
-      openOrderDetail(autoId);
-    }
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginErr');
+  err.textContent = ''; btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const res = await fetch('/api/customer/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email: document.getElementById('lEmail').value, password: document.getElementById('lPass').value, claimOrderId: pendingClaimId }),
+    });
+    const d = await res.json();
+    if (!res.ok) { err.textContent = d.error||'Login failed'; return; }
+    currentCustomer = d; pendingClaimId = null;
+    await showDashboard();
+  } finally { btn.disabled=false; btn.textContent='Sign In'; }
+}
+
+async function doRegister() {
+  const btn = document.getElementById('regBtn');
+  const err = document.getElementById('registerErr');
+  err.textContent = ''; btn.disabled = true; btn.textContent = 'Creating account…';
+  try {
+    const res = await fetch('/api/customer/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        display_name: document.getElementById('rName').value.trim(),
+        email:        document.getElementById('rEmail').value.trim(),
+        password:     document.getElementById('rPass').value,
+        claimOrderId: pendingClaimId,
+      }),
+    });
+    const d = await res.json();
+    if (!res.ok) { err.textContent = d.error||'Registration failed'; return; }
+    currentCustomer = await (await fetch('/api/customer/me')).json();
+    pendingClaimId = null;
+    await showDashboard();
+  } finally { btn.disabled=false; btn.textContent='Create Account'; }
+}
+
+async function doLogout() {
+  await fetch('/api/customer/logout', { method:'POST' });
+  currentCustomer = null; currentOrders = [];
+  document.getElementById('navRight').innerHTML = '';
+  showAuthView();
+}
+
+// ── Dashboard ──────────────────────────────────────────────────────────────
+async function showDashboard() {
+  const name = currentCustomer.display_name || currentCustomer.email;
+  document.getElementById('navRight').innerHTML = `
+    <span class="topnav-user"><strong>${esc(name)}</strong>${esc(currentCustomer.email)}</span>
+    <button class="logout-btn" onclick="doLogout()">Sign Out</button>`;
+
+  const res = await fetch('/api/customer/orders');
+  currentOrders = res.ok ? await res.json() : [];
+
+  const autoId = new URLSearchParams(location.search).get('order');
+  renderOrderList();
+
+  if (autoId) {
+    const match = currentOrders.find(o => o.id === autoId);
+    if (match) openDetail(autoId);
   }
+}
 
-  function openOrderDetail(id) {
-    const order = currentOrders.find(o => o.id === id);
-    if (!order) return;
-    const cfg = STATUS_CFG[order.status] || STATUS_CFG.pending;
+function renderOrderList() {
+  const name = currentCustomer?.display_name || currentCustomer?.email || '';
+  let html = `<div class="dash-header">
+    <div><h1>My Orders</h1><p>Welcome back, ${esc(name.split('@')[0])}</p></div>
+    <a href="/#order" class="new-order-btn">+ New Order</a>
+  </div>`;
 
-    const rows = [
-      ['Service',  order.service || '—'],
-      ['Amount',   fmtGBP(order.amount_cents)],
-    ];
-    if (order.options)        rows.push(['Options',     order.options]);
-    if (order.addons)         rows.push(['Add-ons',     order.addons]);
-    const sched = fmtDate(order.scheduled_start);
-    if (sched)                rows.push(['Scheduled',   sched]);
-    const end = fmtDate(order.scheduled_end);
-    if (end)                  rows.push(['Est. finish', end]);
-    rows.push(['Ordered', fmtDate(order.created_at) || '—']);
+  if (!currentOrders.length) {
+    html += `<div class="empty">No orders yet. <a href="/#order">Place your first boost →</a></div>`;
+  } else {
+    html += `<div class="orders-list">` + currentOrders.map(o => {
+      const s = STATUS[o.status] || STATUS.pending;
+      return `<div class="order-row" onclick="openDetail('${o.id}')">
+        <div class="order-row-main">
+          <div class="order-row-svc">${esc(o.service||'—')}</div>
+          <div class="order-row-meta">${fmtShort(o.created_at)}${o.scheduled_start?' · '+fmtDate(o.scheduled_start):''}</div>
+        </div>
+        <div class="order-row-right">
+          <span class="order-row-price">${fmtGBP(o.amount_cents)}</span>
+          <span class="badge badge-${o.status}">${s.label}</span>
+          ${o.msg_count > 0 ? `<span class="msg-badge">💬 ${o.msg_count}</span>` : ''}
+          <span class="chev">›</span>
+        </div>
+      </div>`;
+    }).join('') + `</div>`;
+  }
+  document.getElementById('app').innerHTML = html;
+  stopChatPoll();
+}
 
-    const rowHtml = rows.map(([l,v]) =>
-      `<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${esc(v)}</span></div>`
-    ).join('');
+// ── Order detail ───────────────────────────────────────────────────────────
+function openDetail(id) {
+  const order = currentOrders.find(o => o.id === id);
+  if (!order) return;
+  const s = STATUS[order.status] || STATUS.pending;
 
-    const panel = document.createElement('div');
-    panel.className = 'detail-card';
-    panel.id = 'detailPanel';
-    panel.innerHTML = `
+  const rows = [
+    ['Service', order.service||'—'],
+    ['Amount',  fmtGBP(order.amount_cents)],
+  ];
+  if (order.options) rows.push(['Options', order.options]);
+  if (order.addons)  rows.push(['Add-ons', order.addons]);
+  const sched = fmtDate(order.scheduled_start); if (sched) rows.push(['Scheduled', sched]);
+  const fin   = fmtDate(order.scheduled_end);   if (fin)   rows.push(['Est. finish', fin]);
+  rows.push(['Ordered', fmtDate(order.created_at)||'—']);
+
+  const chatSection = (order.status === 'accepted' || order.status === 'completed')
+    ? `<div class="chat-section">
+        <div class="chat-title">💬 Messages with your booster</div>
+        <div class="chat-msgs" id="chatMsgs"><div class="chat-empty">Loading messages…</div></div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chatInput" placeholder="Type a message…" autocomplete="off"/>
+          <button class="chat-send" id="chatSend" onclick="sendMsg('${order.id}')">Send</button>
+        </div>
+      </div>`
+    : (order.status === 'pending'
+        ? `<div class="chat-section"><div class="chat-must-login">💬 Chat becomes available once a booster accepts your order.</div></div>`
+        : '');
+
+  document.getElementById('app').innerHTML = `
+    <div class="detail-card">
       <div class="detail-head">
         <h2>${esc(order.service||'Order')}</h2>
-        <button class="back-link" onclick="closeOrderDetail()">← Back to orders</button>
+        <button class="back-btn" onclick="backToList()">← My Orders</button>
       </div>
-      <div class="status-banner ${cfg.cls}">
-        <div class="status-icon">${cfg.icon}</div>
+      <div class="status-banner ${s.cls}">
+        <div class="status-icon">${s.icon}</div>
         <div>
-          <div class="status-label">${cfg.label}</div>
-          <div class="status-title">${cfg.title}</div>
-          <div class="status-sub">${cfg.sub}</div>
+          <div class="status-label">${s.label}</div>
+          <div class="status-title">${s.title}</div>
+          <div class="status-sub">${s.sub}</div>
         </div>
       </div>
-      <div class="detail-rows">${rowHtml}</div>
+      <div class="detail-rows">
+        ${rows.map(([l,v])=>`<div class="detail-row"><span class="dl">${l}</span><span class="dv">${esc(v)}</span></div>`).join('')}
+      </div>
       <div class="oid-box">
         <div><div class="oid-label">Order ID</div><div class="oid-val">${esc(order.id)}</div></div>
-        <button class="copy-btn" onclick="copyId('${esc(order.id)}',this)">Copy</button>
+        <button class="copy-btn" onclick="copyText('${esc(order.id)}',this)">Copy</button>
       </div>
-    `;
+      ${chatSection}
+    </div>`;
 
-    // Replace list with detail (or insert after)
-    const list = document.getElementById('ordersList') || document.getElementById('app').lastElementChild;
-    if (list) list.replaceWith(panel);
-    else document.getElementById('app').appendChild(panel);
+  stopChatPoll();
+  if (order.status === 'accepted' || order.status === 'completed') {
+    loadMessages(order.id);
+    chatPollTimer = setInterval(() => loadMessages(order.id), 8000);
+    document.getElementById('chatInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendMsg(order.id);
+    });
   }
+}
 
-  function closeOrderDetail() {
-    renderDashboard(
-      document.querySelector('.topnav-user strong')?.textContent || '',
-      currentOrders
-    );
+async function loadMessages(orderId) {
+  const res = await fetch(`/api/customer/orders/${orderId}/messages`);
+  if (!res.ok) return;
+  const msgs = await res.json();
+  const box  = document.getElementById('chatMsgs');
+  if (!box) return;
+  const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  if (!msgs.length) {
+    box.innerHTML = '<div class="chat-empty">No messages yet. Say hi to your booster!</div>';
+    return;
   }
+  box.innerHTML = msgs.map(m => {
+    const isMe = m.sender_role === 'customer';
+    const t = fmtTime(m.created_at);
+    return `<div class="bubble ${isMe?'me':'other'}">
+      ${!isMe ? `<div class="bubble-name">${esc(m.sender_name)}</div>` : ''}
+      ${esc(m.body)}
+      <div class="bubble-time">${t}</div>
+    </div>`;
+  }).join('');
+  if (wasAtBottom) box.scrollTop = box.scrollHeight;
+}
 
-  async function doLogout() {
-    await fetch('/api/customer/logout', { method:'POST' });
-    document.getElementById('navRight').innerHTML = '';
-    showAuthView();
-  }
+async function sendMsg(orderId) {
+  const input = document.getElementById('chatInput');
+  const btn   = document.getElementById('chatSend');
+  const body  = input.value.trim();
+  if (!body) return;
+  btn.disabled = true;
+  try {
+    await fetch(`/api/customer/orders/${orderId}/messages`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ body }),
+    });
+    input.value = '';
+    await loadMessages(orderId);
+  } finally { btn.disabled = false; }
+}
 
-  // ── Guest / no-account tracking ───────────────────────────────────────────
-  function showGuestView() {
-    document.getElementById('navRight').innerHTML = '';
-    document.getElementById('app').innerHTML = `
-      <div class="guest-card">
-        <div class="guest-card-head">
-          <h2>Track Your Order</h2>
-          <p>Enter your email address to see all your orders, or paste an Order ID directly.</p>
-        </div>
-        <div class="guest-card-body">
-          <form id="guestForm" onsubmit="handleGuestSearch(event)">
-            <input id="guestInput" type="text" placeholder="Email address or Order ID…" autocomplete="off" spellcheck="false"/>
-            <button id="guestBtn" type="submit">Track</button>
-          </form>
-          <div class="guest-hint">Your Order ID was shown immediately after checkout.</div>
-          <div class="guest-err" id="guestErr"></div>
-        </div>
+function backToList() { stopChatPoll(); renderOrderList(); }
+function stopChatPoll() { if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; } }
+
+// ── Guest view ─────────────────────────────────────────────────────────────
+let guestResultOrderId = null;
+
+function showGuestView() {
+  stopChatPoll();
+  document.getElementById('navRight').innerHTML = '';
+  document.getElementById('app').innerHTML = `
+    <div class="guest-card">
+      <div class="guest-head">
+        <h2>Track Your Order</h2>
+        <p>Enter your email to see all orders, or paste an Order ID for a specific one.</p>
       </div>
-      <div class="login-prompt">Have an account? <a onclick="showAuthView()">Sign in →</a></div>
-      <div id="guestResult" style="margin-top:1rem;"></div>
-    `;
-  }
+      <div class="guest-body">
+        <div class="guest-form">
+          <input class="guest-input" id="gInput" placeholder="Email or Order ID…" autocomplete="off" spellcheck="false"/>
+          <button class="guest-btn" id="gBtn" onclick="handleGuestSearch()">Track</button>
+        </div>
+        <div class="guest-hint">Order ID shown immediately after checkout.</div>
+        <div class="guest-err" id="gErr"></div>
+      </div>
+    </div>
+    <div class="signin-prompt">Have an account? <a onclick="showAuthView()">Sign in →</a></div>
+    <div id="gResult" style="margin-top:.8rem;"></div>`;
 
-  function handleGuestSearch(e) {
-    e.preventDefault();
-    const q = document.getElementById('guestInput').value.trim();
-    if (!q) { document.getElementById('guestErr').textContent = 'Please enter your email or Order ID.'; return; }
-    guestLookup(q);
-  }
+  document.getElementById('gInput').addEventListener('keydown', e => { if(e.key==='Enter') handleGuestSearch(); });
+}
 
-  async function guestLookup(q) {
-    const btn = document.getElementById('guestBtn');
-    const err = document.getElementById('guestErr');
-    if (!btn || !err) return;
-    err.textContent = '';
-    btn.disabled = true; btn.textContent = 'Looking up…';
-    try {
-      if (q.includes('@')) {
-        const res = await fetch('/api/portal/by-email?email=' + encodeURIComponent(q));
-        if (!res.ok) { err.textContent = 'Something went wrong.'; return; }
-        const orders = await res.json();
-        renderGuestList(orders);
-      } else {
-        const res = await fetch('/api/portal/' + encodeURIComponent(q));
-        if (res.status === 404) { err.textContent = 'Order not found. Check your Order ID and try again.'; return; }
-        if (!res.ok) { err.textContent = 'Something went wrong.'; return; }
-        renderGuestSingle(await res.json());
-      }
-    } catch(e) { err.textContent = 'Could not connect. Please try again.'; }
-    finally { btn.disabled=false; btn.textContent='Track'; }
-  }
+async function handleGuestSearch() {
+  const q = document.getElementById('gInput').value.trim();
+  if (!q) { document.getElementById('gErr').textContent = 'Please enter your email or Order ID.'; return; }
+  await guestLookup(q, null);
+}
 
-  function renderGuestList(orders) {
-    const el = document.getElementById('guestResult');
-    if (!orders.length) { el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1.5rem 0;font-size:.88rem;">No orders found for that email.</div>'; return; }
-    el.innerHTML = `<div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;">${orders.length} order${orders.length!==1?'s':''} found</div>` +
-      orders.map(o => `<div class="order-row" onclick='renderGuestSingleInline(${JSON.stringify(o)})'>
+async function guestLookup(q, claimId) {
+  const btn = document.getElementById('gBtn');
+  const err = document.getElementById('gErr');
+  if (btn) { btn.disabled = true; btn.textContent = 'Looking up…'; }
+  if (err) err.textContent = '';
+  try {
+    if (q.includes('@')) {
+      const res = await fetch('/api/portal/by-email?email=' + encodeURIComponent(q));
+      if (!res.ok) { if(err) err.textContent = 'Something went wrong.'; return; }
+      renderGuestList(await res.json());
+    } else {
+      const res = await fetch('/api/portal/' + encodeURIComponent(q));
+      if (res.status === 404) { if(err) err.textContent = 'Order not found. Check your Order ID.'; return; }
+      if (!res.ok) { if(err) err.textContent = 'Something went wrong.'; return; }
+      guestResultOrderId = q;
+      renderGuestOrder(await res.json());
+    }
+  } catch(e) { if(err) err.textContent = 'Could not connect. Please try again.'; }
+  finally { if(btn) { btn.disabled=false; btn.textContent='Track'; } }
+}
+
+function renderGuestList(orders) {
+  const el = document.getElementById('gResult');
+  if (!orders.length) { el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.88rem;">No orders found for that email.</div>'; return; }
+  el.innerHTML = `<p style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem;">${orders.length} order${orders.length!==1?'s':''} found</p>` +
+    orders.map(o => {
+      const s = STATUS[o.status]||STATUS.pending;
+      return `<div class="order-row" onclick="guestLookup('${o.id}', '${o.id}')">
         <div class="order-row-main">
           <div class="order-row-svc">${esc(o.service||'—')}</div>
           <div class="order-row-meta">${fmtShort(o.created_at)}</div>
         </div>
         <div class="order-row-right">
           <span class="order-row-price">${fmtGBP(o.amount_cents)}</span>
-          <span class="badge badge-${o.status}">${o.status}</span>
+          <span class="badge badge-${o.status}">${s.label}</span>
           <span class="chev">›</span>
         </div>
-      </div>`).join('');
-  }
+      </div>`;
+    }).join('');
+}
 
-  function renderGuestSingleInline(order) { renderGuestSingle(order); }
+function renderGuestOrder(order) {
+  const s = STATUS[order.status]||STATUS.pending;
+  const rows = [['Service',order.service||'—'],['Amount',fmtGBP(order.amount_cents)]];
+  if (order.options) rows.push(['Options',order.options]);
+  if (order.addons)  rows.push(['Add-ons',order.addons]);
+  const sd = fmtDate(order.scheduled_start); if(sd) rows.push(['Scheduled',sd]);
+  const ed = fmtDate(order.scheduled_end);   if(ed) rows.push(['Est. finish',ed]);
+  rows.push(['Ordered',fmtDate(order.created_at)||'—']);
 
-  function renderGuestSingle(order) {
-    const el  = document.getElementById('guestResult') || document.getElementById('app');
-    const cfg = STATUS_CFG[order.status] || STATUS_CFG.pending;
-    const rows = [['Service', order.service||'—'],['Amount',fmtGBP(order.amount_cents)]];
-    if (order.options) rows.push(['Options',order.options]);
-    if (order.addons)  rows.push(['Add-ons',order.addons]);
-    const s = fmtDate(order.scheduled_start); if (s) rows.push(['Scheduled',s]);
-    const e = fmtDate(order.scheduled_end);   if (e) rows.push(['Est. finish',e]);
-    rows.push(['Ordered',fmtDate(order.created_at)||'—']);
-
-    el.innerHTML = `<div class="detail-card">
+  const el = document.getElementById('gResult') || document.getElementById('app');
+  el.innerHTML = `
+    <div class="detail-card" style="margin-top:.2rem">
       <div class="detail-head">
         <h2>${esc(order.service||'Order')}</h2>
-        <button class="back-link" onclick="document.getElementById('guestResult').innerHTML='';document.getElementById('guestInput').value=''">← Search again</button>
+        <button class="back-btn" onclick="document.getElementById('gResult').innerHTML='';document.getElementById('gInput').value=''">← Search again</button>
       </div>
-      <div class="status-banner ${cfg.cls}">
-        <div class="status-icon">${cfg.icon}</div>
-        <div>
-          <div class="status-label">${cfg.label}</div>
-          <div class="status-title">${cfg.title}</div>
-          <div class="status-sub">${cfg.sub}</div>
-        </div>
+      <div class="status-banner ${s.cls}">
+        <div class="status-icon">${s.icon}</div>
+        <div><div class="status-label">${s.label}</div><div class="status-title">${s.title}</div><div class="status-sub">${s.sub}</div></div>
       </div>
-      <div class="detail-rows">${rows.map(([l,v])=>`<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${esc(v)}</span></div>`).join('')}</div>
+      <div class="detail-rows">
+        ${rows.map(([l,v])=>`<div class="detail-row"><span class="dl">${l}</span><span class="dv">${esc(v)}</span></div>`).join('')}
+      </div>
       <div class="oid-box">
         <div><div class="oid-label">Order ID</div><div class="oid-val">${esc(order.id)}</div></div>
-        <button class="copy-btn" onclick="copyId('${esc(order.id)}',this)">Copy</button>
+        <button class="copy-btn" onclick="copyText('${esc(order.id)}',this)">Copy</button>
       </div>
+      ${order.status === 'accepted' || order.status === 'completed'
+        ? `<div class="chat-section"><div class="chat-must-login">💬 <a onclick="showAuthView('login','${order.id}')">Sign in</a> or <a onclick="showAuthView('register','${order.id}')">create an account</a> to chat with your booster.</div></div>`
+        : ''}
       <div style="padding:0 1.2rem 1.2rem;">
-        <div class="login-prompt" style="text-align:left;margin-top:0;">Want to save your orders? <a onclick="showAuthView()">Create a free account →</a></div>
+        <div class="signin-prompt" style="text-align:left;margin-top:.6rem">
+          Want to save this order to your account?
+          <a onclick="showAuthView('register','${order.id}')">Create a free account →</a>
+        </div>
       </div>
     </div>`;
-  }
+}
 
-  function copyId(id, btn) {
-    navigator.clipboard.writeText(id).then(() => {
-      btn.textContent = 'Copied!';
-      setTimeout(() => btn.textContent = 'Copy', 2000);
-    });
-  }
-  </script>
+// ── Helpers ────────────────────────────────────────────────────────────────
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
 </body>
 </html>

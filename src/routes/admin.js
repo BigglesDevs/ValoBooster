@@ -84,10 +84,13 @@ router.get('/api/me', requireAuth, (req, res) => res.json(req.user));
 // ── Orders ────────────────────────────────────────────────────────────────────
 router.get('/api/orders', requireAuth, (req, res) => {
   const rows = req.user.role === 'admin'
-    ? db.prepare(`SELECT o.*, u.display_name booster_name FROM orders o
-                  LEFT JOIN users u ON o.booster_id=u.id ORDER BY o.created_at DESC`).all()
-    : db.prepare(`SELECT o.*, u.display_name booster_name FROM orders o
-                  LEFT JOIN users u ON o.booster_id=u.id
+    ? db.prepare(`SELECT o.*, u.display_name booster_name,
+                    (SELECT COUNT(*) FROM messages WHERE order_id=o.id) msg_count
+                  FROM orders o LEFT JOIN users u ON o.booster_id=u.id
+                  ORDER BY o.created_at DESC`).all()
+    : db.prepare(`SELECT o.*, u.display_name booster_name,
+                    (SELECT COUNT(*) FROM messages WHERE order_id=o.id) msg_count
+                  FROM orders o LEFT JOIN users u ON o.booster_id=u.id
                   WHERE o.status='pending' OR o.booster_id=?
                   ORDER BY o.created_at DESC`).all(req.user.id);
   res.json(rows);
@@ -106,6 +109,13 @@ router.post('/api/orders/:id/accept', requireAuth, async (req, res) => {
   }
 
   db.prepare("UPDATE orders SET status='accepted', booster_id=? WHERE id=?").run(req.user.id, order.id);
+
+  // Auto-open chat with a welcome message from the booster
+  const boosterName = req.user.display_name || req.user.email.split('@')[0];
+  db.prepare('INSERT INTO messages (id,order_id,sender_role,sender_name,body) VALUES (?,?,?,?,?)')
+    .run(uuidv4(), order.id, 'booster', boosterName,
+      `Hi! I've accepted your order and I'm ready to boost. Feel free to message me here with any questions or to coordinate timing.`);
+
   if (order.customer_email) {
     sendOrderEmail(order.customer_email, { ...order, _status: 'accepted' })
       .catch(e => console.error('Accept email error:', e.message));
@@ -237,6 +247,29 @@ router.get('/api/calendar', requireAuth, (req, res) => {
                   FROM orders o LEFT JOIN users u ON o.booster_id=u.id
                   WHERE o.booster_id=? AND o.scheduled_start IS NOT NULL ORDER BY o.scheduled_start`).all(req.user.id);
   res.json(rows);
+});
+
+// ── Messages ──────────────────────────────────────────────────────────────────
+router.get('/api/orders/:id/messages', requireAuth, (req, res) => {
+  const order = db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (req.user.role !== 'admin' && order.booster_id !== req.user.id)
+    return res.status(403).json({ error: 'Forbidden' });
+  res.json(db.prepare('SELECT * FROM messages WHERE order_id=? ORDER BY created_at ASC').all(order.id));
+});
+
+router.post('/api/orders/:id/messages', requireAuth, express.json(), (req, res) => {
+  const order = db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (req.user.role !== 'admin' && order.booster_id !== req.user.id)
+    return res.status(403).json({ error: 'Forbidden' });
+  const body = (req.body?.body || '').trim();
+  if (!body) return res.status(400).json({ error: 'Message cannot be empty' });
+  const id = uuidv4();
+  const name = req.user.display_name || req.user.email.split('@')[0];
+  db.prepare('INSERT INTO messages (id,order_id,sender_role,sender_name,body) VALUES (?,?,?,?,?)')
+    .run(id, order.id, 'booster', name, body);
+  res.json({ ok: true, id });
 });
 
 // ── Dashboard pages ───────────────────────────────────────────────────────────

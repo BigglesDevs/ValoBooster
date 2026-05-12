@@ -109,6 +109,21 @@
   </main>
 </div>
 
+<!-- Chat modal -->
+<div class="modal-overlay hidden" id="chatModal">
+  <div class="modal" style="max-width:540px;display:flex;flex-direction:column;max-height:90vh">
+    <div class="modal-head">
+      <h3 id="chatModalTitle">Chat</h3>
+      <button class="modal-close" id="chatClose">&times;</button>
+    </div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Type a message…" />
+      <button class="btn btn-primary btn-sm" id="chatSend">Send</button>
+    </div>
+  </div>
+</div>
+
 <!-- Schedule modal -->
 <div class="modal-overlay hidden" id="scheduleModal">
   <div class="modal">
