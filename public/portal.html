@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Order Tracker — ValoBooster</title>
+  <title>My Orders — ValoBooster</title>
   <link rel="icon" href="/favicon.png"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --bg:      #0d0d14;
       --surface: #15151f;
       --card:    #1c1c28;
       --border:  #2a2a3a;
       --red:     #ff4655;
+      --red-dim: #cc3544;
       --text:    #e2e2e2;
       --muted:   #777;
       --green:   #2ecc71;
@@ -21,73 +21,120 @@
       --blue:    #3498db;
       --orange:  #e67e22;
     }
+    body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem 4rem;
+    /* ── Top nav ── */
+    .topnav { display:flex; align-items:center; justify-content:space-between; padding:.9rem 1.4rem; border-bottom:1px solid var(--border); background:var(--surface); }
+    .topnav-logo { font-size:1.1rem; font-weight:800; text-decoration:none; color:var(--text); }
+    .topnav-logo span { color:var(--red); }
+    .topnav-right { display:flex; align-items:center; gap:.7rem; }
+    .topnav-user { font-size:.82rem; color:var(--muted); }
+    .topnav-user strong { color:var(--text); display:block; font-size:.88rem; }
+
+    /* ── Layout ── */
+    .wrap { max-width:580px; margin:0 auto; padding:2rem 1rem 4rem; }
+
+    /* ── Auth card (login/register) ── */
+    .auth-card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+    .auth-logo { text-align:center; padding:2rem 1.6rem 1rem; }
+    .auth-logo h1 { font-size:1.3rem; font-weight:800; }
+    .auth-logo h1 span { color:var(--red); }
+    .auth-logo p { color:var(--muted); font-size:.82rem; margin-top:.3rem; }
+
+    .auth-tabs { display:flex; border-bottom:1px solid var(--border); }
+    .auth-tab {
+      flex:1; padding:.85rem; background:none; border:none; color:var(--muted);
+      font-size:.88rem; font-weight:600; cursor:pointer; border-bottom:2px solid transparent;
+      transition:all .15s;
     }
+    .auth-tab.active { color:var(--text); border-bottom-color:var(--red); background:#ff465508; }
 
-    .logo { margin-bottom: 2.5rem; text-align: center; }
-    .logo a { text-decoration: none; color: var(--text); font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; }
-    .logo a span { color: var(--red); }
-    .logo p { font-size: .8rem; color: var(--muted); margin-top: .3rem; }
+    .auth-form { padding:1.6rem; display:none; }
+    .auth-form.active { display:block; }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      width: 100%;
-      max-width: 520px;
-      overflow: hidden;
+    .field { margin-bottom:1.1rem; }
+    .field label { display:block; font-size:.78rem; color:var(--muted); margin-bottom:.35rem; text-transform:uppercase; letter-spacing:.05em; }
+    .field input {
+      width:100%; padding:.7rem 1rem; background:var(--surface);
+      border:1px solid var(--border); border-radius:8px; color:var(--text);
+      font-size:.92rem; outline:none; transition:border-color .2s;
     }
+    .field input:focus { border-color:var(--red); }
 
-    .card-head { padding: 1.4rem 1.6rem; border-bottom: 1px solid var(--border); }
-    .card-head h1 { font-size: 1.1rem; font-weight: 700; }
-    .card-head p  { font-size: .82rem; color: var(--muted); margin-top: .3rem; line-height: 1.5; }
-
-    .card-body { padding: 1.6rem; }
-
-    /* Search */
-    #searchForm { display: flex; gap: .6rem; }
-    #searchInput {
-      flex: 1; min-width: 0;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: .7rem 1rem;
-      color: var(--text);
-      font-size: .9rem;
-      outline: none;
-      transition: border-color .2s;
+    .btn-primary {
+      width:100%; padding:.75rem; background:var(--red); color:#fff; border:none;
+      border-radius:8px; font-size:.92rem; font-weight:600; cursor:pointer;
+      transition:background .15s; margin-top:.3rem;
     }
-    #searchInput:focus { border-color: var(--red); }
-    #searchBtn {
-      background: var(--red); color: #fff; border: none;
-      border-radius: 8px; padding: .7rem 1.2rem;
-      font-size: .9rem; font-weight: 600; cursor: pointer;
-      white-space: nowrap; transition: opacity .2s; flex-shrink: 0;
+    .btn-primary:hover { background:var(--red-dim); }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+
+    .auth-err { color:#e74c3c; font-size:.82rem; margin-top:.6rem; text-align:center; min-height:1.1em; }
+
+    .divider { display:flex; align-items:center; gap:.7rem; margin:1.2rem 0; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+    .divider span { font-size:.75rem; color:var(--muted); white-space:nowrap; }
+
+    .guest-btn {
+      width:100%; padding:.65rem; background:none; border:1px solid var(--border);
+      border-radius:8px; color:var(--muted); font-size:.85rem; cursor:pointer;
+      transition:all .15s;
     }
-    #searchBtn:hover { opacity: .85; }
-    #searchBtn:disabled { opacity: .5; cursor: not-allowed; }
+    .guest-btn:hover { border-color:var(--red); color:var(--red); }
 
-    .hint { font-size: .78rem; color: var(--muted); margin-top: .6rem; text-align: center; }
-    .err-msg { color: #e74c3c; font-size: .82rem; margin-top: .7rem; text-align: center; min-height: 1.1em; }
+    /* ── Dashboard ── */
+    .dash-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.6rem; }
+    .dash-header h1 { font-size:1.2rem; font-weight:700; }
+    .dash-header p  { font-size:.8rem; color:var(--muted); margin-top:.2rem; }
+    .logout-btn {
+      background:none; border:1px solid var(--border); border-radius:8px;
+      color:var(--muted); padding:.45rem .9rem; font-size:.8rem; cursor:pointer;
+      transition:all .15s; flex-shrink:0;
+    }
+    .logout-btn:hover { border-color:#e74c3c; color:#e74c3c; }
 
-    /* Status banner */
+    .orders-list { display:flex; flex-direction:column; gap:.6rem; }
+    .order-row {
+      background:var(--card); border:1px solid var(--border); border-radius:10px;
+      padding:1rem 1.2rem; cursor:pointer; transition:border-color .15s;
+      display:flex; align-items:center; gap:1rem;
+    }
+    .order-row:hover { border-color:var(--red); }
+    .order-row-main { flex:1; min-width:0; }
+    .order-row-svc   { font-size:.9rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .order-row-meta  { font-size:.75rem; color:var(--muted); margin-top:.2rem; }
+    .order-row-right { display:flex; align-items:center; gap:.5rem; flex-shrink:0; }
+    .order-row-price { font-size:.88rem; font-weight:600; }
+    .chev { color:var(--muted); font-size:1.1rem; }
+
+    .badge {
+      display:inline-block; padding:.2rem .55rem; border-radius:20px;
+      font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+    }
+    .badge-pending   { background:#f1c40f22; color:var(--yellow);  border:1px solid #f1c40f44; }
+    .badge-accepted  { background:#3498db22; color:var(--blue);    border:1px solid #3498db44; }
+    .badge-completed { background:#2ecc7122; color:var(--green);   border:1px solid #2ecc7144; }
+    .badge-declined  { background:#e74c3c22; color:#e74c3c;        border:1px solid #e74c3c44; }
+    .badge-expired   { background:#e67e2222; color:var(--orange);  border:1px solid #e67e2244; }
+
+    .empty { text-align:center; color:var(--muted); padding:3rem 0; font-size:.9rem; }
+    .empty a { color:var(--red); text-decoration:none; }
+
+    /* ── Order detail panel ── */
+    .detail-card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-top:.6rem; }
+    .detail-head { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.2rem; border-bottom:1px solid var(--border); }
+    .detail-head h2 { font-size:.95rem; font-weight:700; }
+    .back-link { background:none; border:none; color:var(--muted); cursor:pointer; font-size:.82rem; transition:color .15s; }
+    .back-link:hover { color:var(--text); }
+
     .status-banner {
-      border-radius: 10px; padding: 1.1rem 1.3rem; margin-bottom: 1.3rem;
-      display: flex; align-items: center; gap: .9rem;
+      display:flex; align-items:center; gap:.9rem;
+      padding:1rem 1.2rem; margin:1.2rem; border-radius:10px;
     }
-    .status-icon  { font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
-    .status-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; opacity: .8; }
-    .status-title { font-size: 1rem; font-weight: 700; margin-top: .1rem; }
-    .status-sub   { font-size: .8rem; opacity: .75; margin-top: .2rem; line-height: 1.4; }
+    .status-icon  { font-size:1.6rem; flex-shrink:0; }
+    .status-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; font-weight:700; opacity:.8; }
+    .status-title { font-size:.95rem; font-weight:700; margin-top:.1rem; }
+    .status-sub   { font-size:.78rem; opacity:.75; margin-top:.2rem; line-height:1.4; }
 
     .status-pending  { background:#f1c40f15; border:1px solid #f1c40f33; color:var(--yellow); }
     .status-accepted { background:#3498db15; border:1px solid #3498db33; color:var(--blue); }
@@ -95,273 +142,414 @@
     .status-declined { background:#e74c3c15; border:1px solid #e74c3c33; color:#e74c3c; }
     .status-expired  { background:#e67e2215; border:1px solid #e67e2233; color:var(--orange); }
 
+    .detail-rows { padding:0 1.2rem 1.2rem; }
     .detail-row {
-      display: flex; justify-content: space-between; align-items: baseline;
-      padding: .65rem 0; border-bottom: 1px solid var(--border); font-size: .88rem;
+      display:flex; justify-content:space-between; align-items:baseline;
+      padding:.6rem 0; border-bottom:1px solid var(--border); font-size:.86rem;
     }
-    .detail-row:last-child { border-bottom: none; }
-    .detail-label { color: var(--muted); flex-shrink: 0; }
-    .detail-value { font-weight: 600; text-align: right; max-width: 65%; }
+    .detail-row:last-child { border-bottom:none; }
+    .detail-label { color:var(--muted); flex-shrink:0; }
+    .detail-value { font-weight:600; text-align:right; max-width:65%; }
 
     .oid-box {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: .75rem 1rem; margin-top: 1.1rem;
-      display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+      background:var(--surface); border:1px solid var(--border); border-radius:8px;
+      padding:.75rem 1rem; margin:0 1.2rem 1.2rem;
+      display:flex; align-items:center; justify-content:space-between; gap:.5rem;
     }
-    .oid-label { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-    .oid-val   { font-family: monospace; font-size: .78rem; color: var(--text); word-break: break-all; margin-top: .15rem; }
+    .oid-label { font-size:.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+    .oid-val   { font-family:monospace; font-size:.76rem; color:var(--text); word-break:break-all; margin-top:.15rem; }
     .copy-btn {
-      background: none; border: 1px solid var(--border); border-radius: 6px;
-      color: var(--muted); padding: .3rem .6rem; font-size: .75rem;
-      cursor: pointer; white-space: nowrap; transition: all .15s; flex-shrink: 0;
+      background:none; border:1px solid var(--border); border-radius:6px; color:var(--muted);
+      padding:.3rem .6rem; font-size:.72rem; cursor:pointer; white-space:nowrap; transition:all .15s; flex-shrink:0;
     }
-    .copy-btn:hover { border-color: var(--red); color: var(--red); }
+    .copy-btn:hover { border-color:var(--red); color:var(--red); }
 
-    .back-btn {
-      display: block; width: 100%; margin-top: 1.2rem;
-      background: none; border: 1px solid var(--border); border-radius: 8px;
-      color: var(--muted); padding: .6rem; font-size: .82rem;
-      cursor: pointer; transition: all .15s; text-align: center;
+    /* ── Guest search ── */
+    .guest-card { background:var(--card); border:1px solid var(--border); border-radius:14px; }
+    .guest-card-head { padding:1.2rem 1.4rem; border-bottom:1px solid var(--border); }
+    .guest-card-head h2 { font-size:.95rem; font-weight:700; }
+    .guest-card-head p  { font-size:.78rem; color:var(--muted); margin-top:.25rem; }
+    .guest-card-body { padding:1.2rem 1.4rem; }
+    #guestForm { display:flex; gap:.6rem; }
+    #guestInput {
+      flex:1; min-width:0; background:var(--surface); border:1px solid var(--border);
+      border-radius:8px; padding:.65rem .9rem; color:var(--text); font-size:.88rem;
+      outline:none; transition:border-color .2s;
     }
-    .back-btn:hover { border-color: var(--red); color: var(--red); }
-
-    /* Multi-order list (email lookup) */
-    .orders-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .8rem; }
-    .order-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .85rem 1rem; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; margin-bottom: .5rem; cursor: pointer; gap: .8rem;
-      transition: border-color .15s;
+    #guestInput:focus { border-color:var(--red); }
+    #guestBtn {
+      background:var(--red); color:#fff; border:none; border-radius:8px;
+      padding:.65rem 1.1rem; font-size:.88rem; font-weight:600; cursor:pointer; flex-shrink:0;
     }
-    .order-row:hover { border-color: var(--red); }
-    .order-row-left  { flex: 1; min-width: 0; }
-    .order-row-svc   { font-size: .88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .order-row-date  { font-size: .75rem; color: var(--muted); margin-top: .15rem; }
-    .order-row-right { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
-    .order-row-price { font-size: .88rem; font-weight: 600; }
+    #guestBtn:disabled { opacity:.5; }
+    .guest-hint { font-size:.75rem; color:var(--muted); margin-top:.5rem; }
+    .guest-err  { color:#e74c3c; font-size:.8rem; margin-top:.5rem; min-height:1.1em; }
 
-    .badge {
-      display: inline-block; padding: .18rem .55rem; border-radius: 20px;
-      font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-    }
-    .badge-pending  { background:#f1c40f22; color:var(--yellow);  border:1px solid #f1c40f44; }
-    .badge-accepted { background:#3498db22; color:var(--blue);    border:1px solid #3498db44; }
-    .badge-completed{ background:#2ecc7122; color:var(--green);   border:1px solid #2ecc7144; }
-    .badge-declined { background:#e74c3c22; color:#e74c3c;        border:1px solid #e74c3c44; }
-    .badge-expired  { background:#e67e2222; color:var(--orange);  border:1px solid #e67e2244; }
-    .badge-chevron  { color: var(--muted); font-size: .85rem; }
+    .login-prompt { margin-top:1.2rem; text-align:center; font-size:.82rem; color:var(--muted); }
+    .login-prompt a { color:var(--red); cursor:pointer; text-decoration:none; }
+    .login-prompt a:hover { text-decoration:underline; }
 
-    .no-orders { text-align: center; color: var(--muted); font-size: .88rem; padding: 1.5rem 0; }
-
-    footer { margin-top: 3rem; font-size: .75rem; color: var(--muted); text-align: center; }
-    footer a { color: var(--red); text-decoration: none; }
+    footer { text-align:center; font-size:.75rem; color:var(--muted); padding:2rem 1rem; }
+    footer a { color:var(--red); text-decoration:none; }
   </style>
 </head>
 <body>
 
-  <div class="logo">
-    <a href="/"><span>Valo</span>Booster</a>
-    <p>Order Tracker</p>
+  <nav class="topnav">
+    <a href="/" class="topnav-logo"><span>Valo</span>Booster</a>
+    <div class="topnav-right" id="navRight">
+      <!-- filled by JS -->
+    </div>
+  </nav>
+
+  <div class="wrap" id="app">
+    <!-- filled by JS -->
   </div>
 
-  <div class="card">
-    <div class="card-head">
-      <h1>Track Your Order</h1>
-      <p>Enter your <strong>email address</strong> to see all your orders, or paste your <strong>Order ID</strong> for a specific order.</p>
-    </div>
-    <div class="card-body">
-
-      <!-- Search -->
-      <div id="searchSection">
-        <form id="searchForm">
-          <input id="searchInput" type="text" placeholder="Email address or Order ID…" autocomplete="off" spellcheck="false"/>
-          <button id="searchBtn" type="submit">Track</button>
-        </form>
-        <div class="hint">Your Order ID was shown after checkout and is in your confirmation email.</div>
-        <div id="errMsg" class="err-msg"></div>
-      </div>
-
-      <!-- Single order detail -->
-      <div id="orderDetail" style="display:none">
-        <div id="statusBanner" class="status-banner">
-          <div class="status-icon" id="statusIcon"></div>
-          <div>
-            <div class="status-label" id="statusLabel"></div>
-            <div class="status-title" id="statusTitle"></div>
-            <div class="status-sub"   id="statusSub"></div>
-          </div>
-        </div>
-        <div id="detailRows"></div>
-        <div class="oid-box">
-          <div>
-            <div class="oid-label">Order ID</div>
-            <div class="oid-val" id="oidDisplay"></div>
-          </div>
-          <button class="copy-btn" id="copyBtn">Copy</button>
-        </div>
-        <button class="back-btn" id="backFromDetail">← Search again</button>
-      </div>
-
-      <!-- Email multi-order list -->
-      <div id="orderList" style="display:none">
-        <div class="orders-label" id="listLabel"></div>
-        <div id="orderRows"></div>
-        <button class="back-btn" id="backFromList">← Search again</button>
-      </div>
-
-    </div>
-  </div>
-
-  <footer>
-    <p>ValoBooster &bull; <a href="/">Back to site</a></p>
-  </footer>
+  <footer>ValoBooster &bull; <a href="/">Back to site</a></footer>
 
   <script>
-    const STATUS_CONFIG = {
-      pending:   { icon:'⏳', cls:'status-pending',   label:'Pending',   title:'Waiting for a booster',         sub:'Your payment is reserved but not charged yet. A booster will accept your order shortly.' },
-      accepted:  { icon:'✅', cls:'status-accepted',  label:'Accepted',  title:'Booster confirmed — boost in progress!', sub:'Your card has been charged. Your boost is underway.' },
-      completed: { icon:'🏆', cls:'status-completed', label:'Completed', title:'Your boost is complete!',        sub:'Your order has been finished. Enjoy your new rank!' },
-      declined:  { icon:'❌', cls:'status-declined',  label:'Declined',  title:'No booster was available',       sub:'Your order was declined. Your card was not charged — the hold has been fully released.' },
-      expired:   { icon:'⌛', cls:'status-expired',   label:'Expired',   title:'Order expired',                  sub:'No booster accepted within 24 hours. Your card was not charged.' },
-    };
+  // ── Config ────────────────────────────────────────────────────────────────
+  const STATUS_CFG = {
+    pending:   { icon:'⏳', cls:'status-pending',   label:'Pending',   title:'Waiting for a booster',             sub:'Your payment is reserved but not charged yet. A booster will confirm your order shortly.' },
+    accepted:  { icon:'✅', cls:'status-accepted',  label:'Confirmed', title:'Booster confirmed — boost in progress!', sub:'Your card has been charged. Your boost is underway — play along with your booster!' },
+    completed: { icon:'🏆', cls:'status-completed', label:'Completed', title:'Boost complete!',                    sub:'Your order has finished. Enjoy your new rank!' },
+    declined:  { icon:'❌', cls:'status-declined',  label:'Declined',  title:'No booster was available',           sub:'Your order was declined. Your card was not charged — the hold has been fully released.' },
+    expired:   { icon:'⌛', cls:'status-expired',   label:'Expired',   title:'Order expired',                      sub:'No booster accepted within 24 hours. Your card was not charged.' },
+  };
 
-    function fmtGBP(cents) { return '£' + ((cents || 0) / 100).toFixed(2); }
-    function fmtDate(unix)  { return unix ? new Date(unix * 1000).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : null; }
-    function fmtDateShort(unix) { return unix ? new Date(unix * 1000).toLocaleDateString('en-GB', { dateStyle: 'medium' }) : null; }
+  function fmtGBP(c)  { return '£' + ((c||0)/100).toFixed(2); }
+  function fmtDate(u) { return u ? new Date(u*1000).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'}) : null; }
+  function fmtShort(u){ return u ? new Date(u*1000).toLocaleDateString('en-GB',{dateStyle:'medium'}) : ''; }
+  function esc(s)     { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    function showSection(name) {
-      ['searchSection','orderDetail','orderList'].forEach(id => {
-        document.getElementById(id).style.display = id === name ? '' : 'none';
-      });
-    }
+  let currentOrders = [];
 
-    function renderSingleOrder(order) {
-      const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
-      const banner = document.getElementById('statusBanner');
-      banner.className = 'status-banner ' + cfg.cls;
-      document.getElementById('statusIcon').textContent  = cfg.icon;
-      document.getElementById('statusLabel').textContent = cfg.label;
-      document.getElementById('statusTitle').textContent = cfg.title;
-      document.getElementById('statusSub').textContent   = cfg.sub;
-
-      const rows = [['Service', order.service || '—'], ['Amount', fmtGBP(order.amount_cents)]];
-      if (order.options) rows.push(['Options', order.options]);
-      if (order.addons)  rows.push(['Add-ons', order.addons]);
-      const start = fmtDate(order.scheduled_start);
-      if (start) rows.push(['Scheduled', start]);
-      const end = fmtDate(order.scheduled_end);
-      if (end)   rows.push(['Est. finish', end]);
-      rows.push(['Ordered', fmtDate(order.created_at) || '—']);
-
-      document.getElementById('detailRows').innerHTML = rows.map(([l, v]) =>
-        `<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${v}</span></div>`
-      ).join('');
-
-      document.getElementById('oidDisplay').textContent = order.id;
-      showSection('orderDetail');
-    }
-
-    function renderOrderList(orders) {
-      const label = document.getElementById('listLabel');
-      const rows  = document.getElementById('orderRows');
-      label.textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''} found`;
-
-      if (!orders.length) {
-        rows.innerHTML = '<div class="no-orders">No orders found for that email address.</div>';
-        showSection('orderList');
-        return;
+  // ── Boot ──────────────────────────────────────────────────────────────────
+  (async () => {
+    const res = await fetch('/api/customer/me');
+    if (res.ok) {
+      const me = await res.json();
+      showDashboard(me);
+    } else {
+      // Check for ?order= auto-load
+      const autoId = new URLSearchParams(location.search).get('order');
+      if (autoId) {
+        showGuestView();
+        document.getElementById('guestInput').value = autoId;
+        guestLookup(autoId);
+      } else {
+        showAuthView();
       }
+    }
+  })();
 
-      rows.innerHTML = orders.map(o => {
+  // ── Auth view (login / register) ──────────────────────────────────────────
+  function showAuthView() {
+    document.getElementById('navRight').innerHTML = '';
+    document.getElementById('app').innerHTML = `
+      <div class="auth-card">
+        <div class="auth-logo">
+          <h1><span>Valo</span>Booster</h1>
+          <p>Sign in to view and track all your orders</p>
+        </div>
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+          <button class="auth-tab" onclick="switchTab('register')">Create Account</button>
+        </div>
+
+        <!-- Login -->
+        <div class="auth-form active" id="loginForm">
+          <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email"/></div>
+          <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Your password" autocomplete="current-password"/></div>
+          <button class="btn-primary" id="loginBtn" onclick="doLogin()">Sign In</button>
+          <div class="auth-err" id="loginErr"></div>
+          <div class="divider"><span>or track without an account</span></div>
+          <button class="guest-btn" onclick="showGuestView()">Track by Order ID or Email →</button>
+        </div>
+
+        <!-- Register -->
+        <div class="auth-form" id="registerForm">
+          <div class="field"><label>Display Name (optional)</label><input type="text" id="regName" placeholder="Your name" autocomplete="name"/></div>
+          <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="you@email.com" autocomplete="email"/></div>
+          <div class="field"><label>Password <span style="color:var(--muted);font-weight:400">(min 8 chars)</span></label><input type="password" id="regPass" placeholder="Choose a password" autocomplete="new-password"/></div>
+          <button class="btn-primary" id="registerBtn" onclick="doRegister()">Create Account</button>
+          <div class="auth-err" id="registerErr"></div>
+        </div>
+      </div>
+    `;
+    // Allow enter key in forms
+    document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+    document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+    document.getElementById('regPass').addEventListener('keydown', e => { if (e.key==='Enter') doRegister(); });
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+    document.getElementById('loginForm').classList.toggle('active', tab==='login');
+    document.getElementById('registerForm').classList.toggle('active', tab==='register');
+  }
+
+  async function doLogin() {
+    const btn = document.getElementById('loginBtn');
+    const err = document.getElementById('loginErr');
+    err.textContent = '';
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    try {
+      const res = await fetch('/api/customer/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value }),
+      });
+      const d = await res.json();
+      if (!res.ok) { err.textContent = d.error || 'Login failed'; return; }
+      showDashboard(d);
+    } finally { btn.disabled=false; btn.textContent='Sign In'; }
+  }
+
+  async function doRegister() {
+    const btn = document.getElementById('registerBtn');
+    const err = document.getElementById('registerErr');
+    err.textContent = '';
+    btn.disabled = true; btn.textContent = 'Creating account…';
+    try {
+      const res = await fetch('/api/customer/register', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          display_name: document.getElementById('regName').value.trim(),
+          email:        document.getElementById('regEmail').value.trim(),
+          password:     document.getElementById('regPass').value,
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok) { err.textContent = d.error || 'Registration failed'; return; }
+      const me = await (await fetch('/api/customer/me')).json();
+      showDashboard(me);
+    } finally { btn.disabled=false; btn.textContent='Create Account'; }
+  }
+
+  // ── Dashboard ─────────────────────────────────────────────────────────────
+  async function showDashboard(me) {
+    const name = me.display_name || me.email;
+    document.getElementById('navRight').innerHTML = `
+      <span class="topnav-user"><strong>${esc(name)}</strong>${esc(me.email)}</span>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    `;
+
+    const res    = await fetch('/api/customer/orders');
+    currentOrders = res.ok ? await res.json() : [];
+
+    renderDashboard(name, currentOrders);
+  }
+
+  function renderDashboard(name, orders) {
+    const autoId = new URLSearchParams(location.search).get('order');
+
+    let html = `<div class="dash-header">
+      <div><h1>My Orders</h1><p>Welcome back, ${esc(name)}</p></div>
+      <a href="/#order" style="text-decoration:none;background:var(--red);color:#fff;border-radius:8px;padding:.5rem 1rem;font-size:.82rem;font-weight:600;">+ New Order</a>
+    </div>`;
+
+    if (!orders.length) {
+      html += `<div class="empty">No orders yet. <a href="/#order">Place your first order →</a></div>`;
+    } else {
+      html += `<div class="orders-list" id="ordersList">` + orders.map(o => {
         const badgeCls = `badge-${o.status}`;
-        const date = fmtDateShort(o.created_at) || '';
-        return `<div class="order-row" onclick="loadOrder('${o.id}')">
-          <div class="order-row-left">
-            <div class="order-row-svc">${esc(o.service || '—')}</div>
-            <div class="order-row-date">${date}</div>
+        return `<div class="order-row" onclick="openOrderDetail('${o.id}')">
+          <div class="order-row-main">
+            <div class="order-row-svc">${esc(o.service||'—')}</div>
+            <div class="order-row-meta">${fmtShort(o.created_at)}${o.scheduled_start ? ' · Scheduled '+fmtDate(o.scheduled_start) : ''}</div>
           </div>
           <div class="order-row-right">
             <span class="order-row-price">${fmtGBP(o.amount_cents)}</span>
             <span class="badge ${badgeCls}">${o.status}</span>
-            <span class="badge-chevron">›</span>
+            <span class="chev">›</span>
           </div>
         </div>`;
-      }).join('');
-
-      showSection('orderList');
+      }).join('') + `</div>`;
     }
 
-    async function lookup(query) {
-      const btn = document.getElementById('searchBtn');
-      const err = document.getElementById('errMsg');
-      err.textContent = '';
-      btn.disabled = true;
-      btn.textContent = 'Looking up…';
+    document.getElementById('app').innerHTML = html;
 
-      const q = query.trim();
-      try {
-        if (q.includes('@')) {
-          // email lookup
-          const res = await fetch('/api/portal/by-email?email=' + encodeURIComponent(q));
-          if (!res.ok) { err.textContent = 'Something went wrong. Please try again.'; return; }
-          renderOrderList(await res.json());
-        } else {
-          // order ID lookup
-          const res = await fetch('/api/portal/' + encodeURIComponent(q));
-          if (res.status === 404) { err.textContent = 'Order not found. Check your Order ID and try again.'; return; }
-          if (!res.ok) { err.textContent = 'Something went wrong. Please try again.'; return; }
-          renderSingleOrder(await res.json());
-        }
-      } catch (e) {
-        err.textContent = 'Could not connect. Please try again.';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Track';
+    // Auto-open order from URL param
+    if (autoId && orders.find(o => o.id === autoId)) {
+      openOrderDetail(autoId);
+    }
+  }
+
+  function openOrderDetail(id) {
+    const order = currentOrders.find(o => o.id === id);
+    if (!order) return;
+    const cfg = STATUS_CFG[order.status] || STATUS_CFG.pending;
+
+    const rows = [
+      ['Service',  order.service || '—'],
+      ['Amount',   fmtGBP(order.amount_cents)],
+    ];
+    if (order.options)        rows.push(['Options',     order.options]);
+    if (order.addons)         rows.push(['Add-ons',     order.addons]);
+    const sched = fmtDate(order.scheduled_start);
+    if (sched)                rows.push(['Scheduled',   sched]);
+    const end = fmtDate(order.scheduled_end);
+    if (end)                  rows.push(['Est. finish', end]);
+    rows.push(['Ordered', fmtDate(order.created_at) || '—']);
+
+    const rowHtml = rows.map(([l,v]) =>
+      `<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${esc(v)}</span></div>`
+    ).join('');
+
+    const panel = document.createElement('div');
+    panel.className = 'detail-card';
+    panel.id = 'detailPanel';
+    panel.innerHTML = `
+      <div class="detail-head">
+        <h2>${esc(order.service||'Order')}</h2>
+        <button class="back-link" onclick="closeOrderDetail()">← Back to orders</button>
+      </div>
+      <div class="status-banner ${cfg.cls}">
+        <div class="status-icon">${cfg.icon}</div>
+        <div>
+          <div class="status-label">${cfg.label}</div>
+          <div class="status-title">${cfg.title}</div>
+          <div class="status-sub">${cfg.sub}</div>
+        </div>
+      </div>
+      <div class="detail-rows">${rowHtml}</div>
+      <div class="oid-box">
+        <div><div class="oid-label">Order ID</div><div class="oid-val">${esc(order.id)}</div></div>
+        <button class="copy-btn" onclick="copyId('${esc(order.id)}',this)">Copy</button>
+      </div>
+    `;
+
+    // Replace list with detail (or insert after)
+    const list = document.getElementById('ordersList') || document.getElementById('app').lastElementChild;
+    if (list) list.replaceWith(panel);
+    else document.getElementById('app').appendChild(panel);
+  }
+
+  function closeOrderDetail() {
+    renderDashboard(
+      document.querySelector('.topnav-user strong')?.textContent || '',
+      currentOrders
+    );
+  }
+
+  async function doLogout() {
+    await fetch('/api/customer/logout', { method:'POST' });
+    document.getElementById('navRight').innerHTML = '';
+    showAuthView();
+  }
+
+  // ── Guest / no-account tracking ───────────────────────────────────────────
+  function showGuestView() {
+    document.getElementById('navRight').innerHTML = '';
+    document.getElementById('app').innerHTML = `
+      <div class="guest-card">
+        <div class="guest-card-head">
+          <h2>Track Your Order</h2>
+          <p>Enter your email address to see all your orders, or paste an Order ID directly.</p>
+        </div>
+        <div class="guest-card-body">
+          <form id="guestForm" onsubmit="handleGuestSearch(event)">
+            <input id="guestInput" type="text" placeholder="Email address or Order ID…" autocomplete="off" spellcheck="false"/>
+            <button id="guestBtn" type="submit">Track</button>
+          </form>
+          <div class="guest-hint">Your Order ID was shown immediately after checkout.</div>
+          <div class="guest-err" id="guestErr"></div>
+        </div>
+      </div>
+      <div class="login-prompt">Have an account? <a onclick="showAuthView()">Sign in →</a></div>
+      <div id="guestResult" style="margin-top:1rem;"></div>
+    `;
+  }
+
+  function handleGuestSearch(e) {
+    e.preventDefault();
+    const q = document.getElementById('guestInput').value.trim();
+    if (!q) { document.getElementById('guestErr').textContent = 'Please enter your email or Order ID.'; return; }
+    guestLookup(q);
+  }
+
+  async function guestLookup(q) {
+    const btn = document.getElementById('guestBtn');
+    const err = document.getElementById('guestErr');
+    if (!btn || !err) return;
+    err.textContent = '';
+    btn.disabled = true; btn.textContent = 'Looking up…';
+    try {
+      if (q.includes('@')) {
+        const res = await fetch('/api/portal/by-email?email=' + encodeURIComponent(q));
+        if (!res.ok) { err.textContent = 'Something went wrong.'; return; }
+        const orders = await res.json();
+        renderGuestList(orders);
+      } else {
+        const res = await fetch('/api/portal/' + encodeURIComponent(q));
+        if (res.status === 404) { err.textContent = 'Order not found. Check your Order ID and try again.'; return; }
+        if (!res.ok) { err.textContent = 'Something went wrong.'; return; }
+        renderGuestSingle(await res.json());
       }
-    }
+    } catch(e) { err.textContent = 'Could not connect. Please try again.'; }
+    finally { btn.disabled=false; btn.textContent='Track'; }
+  }
 
-    async function loadOrder(id) {
-      try {
-        const res = await fetch('/api/portal/' + encodeURIComponent(id));
-        if (!res.ok) return;
-        renderSingleOrder(await res.json());
-      } catch (e) { /* ignore */ }
-    }
+  function renderGuestList(orders) {
+    const el = document.getElementById('guestResult');
+    if (!orders.length) { el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1.5rem 0;font-size:.88rem;">No orders found for that email.</div>'; return; }
+    el.innerHTML = `<div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;">${orders.length} order${orders.length!==1?'s':''} found</div>` +
+      orders.map(o => `<div class="order-row" onclick='renderGuestSingleInline(${JSON.stringify(o)})'>
+        <div class="order-row-main">
+          <div class="order-row-svc">${esc(o.service||'—')}</div>
+          <div class="order-row-meta">${fmtShort(o.created_at)}</div>
+        </div>
+        <div class="order-row-right">
+          <span class="order-row-price">${fmtGBP(o.amount_cents)}</span>
+          <span class="badge badge-${o.status}">${o.status}</span>
+          <span class="chev">›</span>
+        </div>
+      </div>`).join('');
+  }
 
-    function esc(s) {
-      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
+  function renderGuestSingleInline(order) { renderGuestSingle(order); }
 
-    function resetSearch() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('errMsg').textContent = '';
-      showSection('searchSection');
-    }
+  function renderGuestSingle(order) {
+    const el  = document.getElementById('guestResult') || document.getElementById('app');
+    const cfg = STATUS_CFG[order.status] || STATUS_CFG.pending;
+    const rows = [['Service', order.service||'—'],['Amount',fmtGBP(order.amount_cents)]];
+    if (order.options) rows.push(['Options',order.options]);
+    if (order.addons)  rows.push(['Add-ons',order.addons]);
+    const s = fmtDate(order.scheduled_start); if (s) rows.push(['Scheduled',s]);
+    const e = fmtDate(order.scheduled_end);   if (e) rows.push(['Est. finish',e]);
+    rows.push(['Ordered',fmtDate(order.created_at)||'—']);
 
-    document.getElementById('searchForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const q = document.getElementById('searchInput').value.trim();
-      if (!q) { document.getElementById('errMsg').textContent = 'Please enter your email or Order ID.'; return; }
-      lookup(q);
+    el.innerHTML = `<div class="detail-card">
+      <div class="detail-head">
+        <h2>${esc(order.service||'Order')}</h2>
+        <button class="back-link" onclick="document.getElementById('guestResult').innerHTML='';document.getElementById('guestInput').value=''">← Search again</button>
+      </div>
+      <div class="status-banner ${cfg.cls}">
+        <div class="status-icon">${cfg.icon}</div>
+        <div>
+          <div class="status-label">${cfg.label}</div>
+          <div class="status-title">${cfg.title}</div>
+          <div class="status-sub">${cfg.sub}</div>
+        </div>
+      </div>
+      <div class="detail-rows">${rows.map(([l,v])=>`<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${esc(v)}</span></div>`).join('')}</div>
+      <div class="oid-box">
+        <div><div class="oid-label">Order ID</div><div class="oid-val">${esc(order.id)}</div></div>
+        <button class="copy-btn" onclick="copyId('${esc(order.id)}',this)">Copy</button>
+      </div>
+      <div style="padding:0 1.2rem 1.2rem;">
+        <div class="login-prompt" style="text-align:left;margin-top:0;">Want to save your orders? <a onclick="showAuthView()">Create a free account →</a></div>
+      </div>
+    </div>`;
+  }
+
+  function copyId(id, btn) {
+    navigator.clipboard.writeText(id).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
     });
-
-    document.getElementById('copyBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(document.getElementById('oidDisplay').textContent).then(() => {
-        const btn = document.getElementById('copyBtn');
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy', 2000);
-      });
-    });
-
-    document.getElementById('backFromDetail').addEventListener('click', resetSearch);
-    document.getElementById('backFromList').addEventListener('click', resetSearch);
-
-    // Auto-load order ID from URL ?order=
-    const autoId = new URLSearchParams(location.search).get('order');
-    if (autoId) {
-      document.getElementById('searchInput').value = autoId;
-      lookup(autoId);
-    }
+  }
   </script>
 </body>
 </html>

@@ -4,16 +4,18 @@ const crypto       = require('crypto');
 const path         = require('path');
 const cookieParser = require('cookie-parser');
 const { v4: uuidv4 } = require('uuid');
-const bot          = require('./src/bot');
+const bot            = require('./src/bot');
 const { sendOrderEmail } = require('./src/utils/mailer');
-const db           = require('./src/db');
-const adminRouter  = require('./src/routes/admin');
+const db             = require('./src/db');
+const adminRouter    = require('./src/routes/admin');
+const customerRouter = require('./src/routes/customer');
 
 const app = express();
 
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', adminRouter);
+app.use('/api/customer', customerRouter);
 
 // ── Stripe helpers ────────────────────────────────────────────────────────────
 async function stripePost(endpoint, params) {
@@ -144,16 +146,28 @@ app.post('/confirm-payment', express.json(), async (req, res) => {
       ? Math.floor(new Date(scheduledStart).getTime() / 1000)
       : (meta.scheduled_start ? Math.floor(new Date(meta.scheduled_start).getTime() / 1000) : null);
 
+    // Resolve logged-in customer (if any)
+    let customerId = null;
+    const cToken = req.cookies?.cvsession;
+    if (cToken) {
+      const cs = db.prepare(`
+        SELECT c.id FROM customer_sessions cs JOIN customers c ON cs.customer_id=c.id
+        WHERE cs.token=? AND cs.expires_at > unixepoch()
+      `).get(cToken);
+      if (cs) customerId = cs.id;
+    }
+
     const orderId = uuidv4();
     db.prepare(`
       INSERT OR IGNORE INTO orders
-        (id, payment_intent_id, service, amount_cents, customer_email, options, addons, promo, scheduled_start, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+        (id, payment_intent_id, service, amount_cents, customer_email, customer_id, options, addons, promo, scheduled_start, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
     `).run(
       orderId, paymentIntentId,
       description || meta.service || 'Valorant Boost',
       amountCents,
       customerEmail || null,
+      customerId,
       options || meta.options || null,
       addons  || meta.addons  || null,
       promo   || meta.promo   || null,

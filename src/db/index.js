@@ -50,12 +50,27 @@ db.exec(`
     date       TEXT NOT NULL,
     UNIQUE(booster_id, date)
   );
+
+  CREATE TABLE IF NOT EXISTS customers (
+    id            TEXT PRIMARY KEY,
+    email         TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    display_name  TEXT,
+    created_at    INTEGER DEFAULT (unixepoch())
+  );
+
+  CREATE TABLE IF NOT EXISTS customer_sessions (
+    token      TEXT PRIMARY KEY,
+    customer_id TEXT NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+    expires_at INTEGER NOT NULL
+  );
 `);
 
 // Migrations for existing DBs
 for (const col of [
   'ALTER TABLE orders ADD COLUMN payment_intent_id TEXT',
   'ALTER TABLE orders ADD COLUMN scheduled_start INTEGER',
+  'ALTER TABLE orders ADD COLUMN customer_id TEXT REFERENCES customers(id) ON DELETE SET NULL',
 ]) { try { db.exec(col); } catch (_) {} }
 
 module.exports = db;
