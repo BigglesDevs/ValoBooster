@@ -343,9 +343,15 @@ function updateOrderTotal() {
     label = fromRankSel.value && toRankSel.value
       ? `${fromRankSel.value} → ${toRankSel.value}`
       : 'Rank Boost';
+    // Show rank summary section
+    const rs = document.getElementById('rankSummary');
+    if (rs) rs.style.display = '';
   } else {
     base  = FIXED_PRICES[svcType] || 0;
     label = serviceTypeSel.selectedOptions[0].text.split(' — ')[0];
+    // Hide rank summary — not relevant for wins/placement
+    const rs = document.getElementById('rankSummary');
+    if (rs) rs.style.display = 'none';
   }
 
   if (base === 0) {
@@ -435,6 +441,13 @@ document.querySelectorAll('.buy-btn').forEach(btn => {
     if (pkg) {
       serviceTypeSel.value = pkg;
       updateOrderTotal();
+      // Update order section heading to reflect the chosen service
+      const heading = document.querySelector('#order .section-sub');
+      if (heading && pkg !== 'rank') {
+        heading.textContent = 'Your service has been pre-selected below. Fill in your details and proceed to payment.';
+      } else if (heading) {
+        heading.textContent = 'Choose your current rank and desired rank — we calculate the exact fair price in real time.';
+      }
     }
     document.getElementById('order').scrollIntoView({ behavior: 'smooth' });
   });
